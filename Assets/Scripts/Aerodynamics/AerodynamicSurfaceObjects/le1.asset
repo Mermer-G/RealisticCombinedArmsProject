@@ -15,12 +15,12 @@ MonoBehaviour:
   xfoildata: {fileID: 11400000, guid: bca51f5273398c744862009bfb1aea09, type: 2}
   localPoints:
   - {x: 0.45744562, y: 0, z: 2.9707513}
-  - {x: -0.35021734, y: 0, z: -0.8962532}
-  - {x: 0.33985376, y: 0, z: -1.0285317}
-  centerPoint: {x: 0.14902735, y: 0, z: 0.3486555}
-  area: 1.3876723
-  aspectRatio: 0.46683747
-  sweepAngle: 78.20278
+  - {x: -0.3107276, y: 0, z: -0.98196185}
+  - {x: 0.3347268, y: 0, z: -1.0138985}
+  centerPoint: {x: 0.16048162, y: 0, z: 0.32496366}
+  area: 1.2879145
+  aspectRatio: 0.45688558
+  sweepAngle: 79.00218
   cornerVertexColor: {r: 0.4746089, g: 1, b: 0, a: 1}
   edgeVertexColor: {r: 0, g: 0, b: 1, a: 1}
   edgeColor: {r: 0.28700992, g: 1, b: 0.015686274, a: 1}
