@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bcf724e5e37b314caa99d045c2a0093, type: 3}
+  m_Name: v1
+  m_EditorClassIdentifier: 
+  xfoildata: {fileID: 11400000, guid: be93e436d97771e42ae5ac7c886a8ab5, type: 2}
+  localPoints:
+  - {x: 0.0072841644, y: 0, z: 1.1141763}
+  - {x: -1.5588474, y: 0, z: -0.30344152}
+  - {x: -1.5692616, y: 0, z: -0.90103674}
+  - {x: -1.3698139, y: 0, z: -1.1083732}
+  - {x: 0.020551682, y: 0, z: -1.2497001}
+  centerPoint: {x: -0.8940174, y: 0, z: -0.48967505}
+  area: 2.4673657
+  aspectRatio: 1.0254349
+  sweepAngle: 42.150497
+  cornerVertexColor: {r: 0, g: 1, b: 0, a: 1}
+  edgeVertexColor: {r: 0, g: 0, b: 1, a: 1}
+  edgeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  fillColor: {r: 0, g: 1, b: 0, a: 0.3}
+  fontColor: {r: 0, g: 0, b: 0, a: 1}
+  fontBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  fontSize: 10
+  edgeThickness: 2
+  cornerVertexSize: 0.1
+  edgeVertexSize: 0.1

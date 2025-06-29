@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bcf724e5e37b314caa99d045c2a0093, type: 3}
+  m_Name: F-16BodyHalf
+  m_EditorClassIdentifier: 
+  xfoildata: {fileID: 11400000, guid: bca51f5273398c744862009bfb1aea09, type: 2}
+  localPoints:
+  - {x: 0.014152527, y: 0, z: 6.718704}
+  - {x: -0.791626, y: 0, z: 2.5085907}
+  - {x: -1.0652237, y: 0, z: -5.8950195}
+  - {x: 0.01415253, y: 0, z: -6.051956}
+  centerPoint: {x: -0.45451546, y: 0, z: -0.6799202}
+  area: 9.701959
+  aspectRatio: 0.12150616
+  sweepAngle: 79.16512
+  cornerVertexColor: {r: 0, g: 1, b: 0, a: 1}
+  edgeVertexColor: {r: 0, g: 0, b: 1, a: 1}
+  edgeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  fillColor: {r: 0, g: 1, b: 0, a: 0.3}
+  fontColor: {r: 0, g: 0, b: 0, a: 1}
+  fontBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  fontSize: 10
+  edgeThickness: 2
+  cornerVertexSize: 0.1
+  edgeVertexSize: 0.1

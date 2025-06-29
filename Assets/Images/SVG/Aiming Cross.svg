@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 596 596">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 35px;
+      }
+    </style>
+  </defs>
+  <g id="_Radial_Repeat_" data-name="&amp;lt;Radial Repeat&amp;gt;">
+    <line class="cls-1" x1="297" y1="332" x2="297" y2="596"/>
+  </g>
+  <g id="_Radial_Repeat_-2" data-name="&amp;lt;Radial Repeat&amp;gt;">
+    <line class="cls-1" x1="264" y1="297" x2="0" y2="297"/>
+  </g>
+  <g id="_Radial_Repeat_-3" data-name="&amp;lt;Radial Repeat&amp;gt;">
+    <line class="cls-1" x1="299" y1="264" x2="299" y2="0"/>
+  </g>
+  <g id="_Radial_Repeat_-4" data-name="&amp;lt;Radial Repeat&amp;gt;">
+    <line class="cls-1" x1="332" y1="299" x2="596" y2="299"/>
+  </g>
+</svg>
