@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -11,6 +10,8 @@ public class CameraController : MonoBehaviour
     public static CameraController instance;
     public CustomCamera[] customCameras;
     public int activeCameraIndex = 0;
+
+    public Action<Camera> cameraChanged;
 
     [SerializeField] RectTransform crosshair;
 
@@ -45,7 +46,7 @@ public class CameraController : MonoBehaviour
         }
         depthOfField = globalVolumeProfile.components[1] as DepthOfField;
         StartCoroutine(TransitionEffect(animationTime));
-        SoundManager.instance.activeCamera = customCameras[activeCameraIndex].thisCamera;
+        cameraChanged.Invoke(customCameras[activeCameraIndex].thisCamera);
     }
 
     // Update is called once per frame
@@ -61,7 +62,7 @@ public class CameraController : MonoBehaviour
             else activeCameraIndex++;
 
             customCameras[activeCameraIndex].thisCamera.enabled = true;
-            SoundManager.instance.HandleCameraChange(customCameras[activeCameraIndex].thisCamera);
+            cameraChanged.Invoke(customCameras[activeCameraIndex].thisCamera);
         }
 
         //Axis freedom

@@ -45,12 +45,6 @@ public class SoundManager : MonoBehaviour
         InitializePool();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void InitializePool()
     {
         audioSourcePool = new List<AudioSource>();
@@ -63,7 +57,17 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    public void HandleCameraChange(Camera camera)
+    private void OnEnable()
+    {
+        CameraController.instance.cameraChanged += HandleCameraChange;
+    }
+
+    private void OnDisable()
+    {
+        CameraController.instance.cameraChanged -= HandleCameraChange;
+    }
+
+    void HandleCameraChange(Camera camera)
     {
         activeCamera = camera;
         audioListener.transform.SetParent(camera.transform);
