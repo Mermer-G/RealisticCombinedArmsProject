@@ -178,7 +178,6 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         SpeedLocking();
         AddDataToPIDCurves();
         PreventFalling();
-        
 
     }
 

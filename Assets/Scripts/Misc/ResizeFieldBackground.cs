@@ -21,8 +21,8 @@ public class ResizeFieldBackground : MonoBehaviour
     {
         tmp.ForceMeshUpdate(); // TMP'nin layoutunu güncelle
 
-        float width = tmp.preferredWidth + paddingX;
-        float height = tmp.preferredHeight + paddingY;
+        float width = tmp.preferredWidth;// + paddingX;
+        float height = tmp.preferredHeight;// + paddingY;
 
         RectTransform tmpRect = tmp.rectTransform;
         RectTransform bgRect = rectTransform;
@@ -33,23 +33,39 @@ public class ResizeFieldBackground : MonoBehaviour
         // 2. Pivot ve pozisyonu ayarla
         TextAlignmentOptions alignment = tmp.alignment;
 
-        Vector2 pivot = new Vector2(0.5f, 0.5f); // default ortalanmýþ
         Vector2 offset = Vector2.zero;
+        Vector2 pivot = new Vector2(0.5f, 0.5f); // Ortada sabit kalýyor
 
+        // X offset (yatay hizalama)
         if (alignment == TextAlignmentOptions.Left || alignment == TextAlignmentOptions.TopLeft || alignment == TextAlignmentOptions.BottomLeft || alignment == TextAlignmentOptions.BaselineLeft)
         {
-            pivot = new Vector2(0f, 0.5f); // sola yaslý
-            offset = new Vector2(width / 2f, 0f);
+            offset.x = width / 2f;
         }
         else if (alignment == TextAlignmentOptions.Right || alignment == TextAlignmentOptions.TopRight || alignment == TextAlignmentOptions.BottomRight || alignment == TextAlignmentOptions.BaselineRight)
         {
-            pivot = new Vector2(1f, 0.5f); // saða yaslý
-            offset = new Vector2(-width / 2f, 0f);
+            offset.x = -width / 2f;
         }
         else
         {
-            pivot = new Vector2(0.5f, 0.5f); // ortalanmýþ
-            offset = Vector2.zero;
+            offset.x = 0f; // Ortalanmýþ
+        }
+
+        // Y offset (dikey hizalama)
+        if (alignment == TextAlignmentOptions.TopLeft || alignment == TextAlignmentOptions.Top || alignment == TextAlignmentOptions.TopRight)
+        {
+            offset.y = -height / 2f;
+        }
+        else if (alignment == TextAlignmentOptions.BottomLeft || alignment == TextAlignmentOptions.Bottom || alignment == TextAlignmentOptions.BottomRight)
+        {
+            offset.y = height / 2f;
+        }
+        else if (alignment == TextAlignmentOptions.BaselineLeft || alignment == TextAlignmentOptions.Baseline || alignment == TextAlignmentOptions.BaselineRight)
+        {
+            offset.y = height / 4f; // Baseline özel; tahmini offset verildi
+        }
+        else
+        {
+            offset.y = 0f; // Ortalanmýþ
         }
 
         bgRect.pivot = pivot;
