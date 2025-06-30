@@ -57,7 +57,6 @@ public class TextFieldManager : MonoBehaviour
 
         foreach (var field in screenTextFields.Values)
         {
-            print("Left: " + left + " Top: " + top);
             field.parent.localPosition = new Vector3(left, top, 0);
             top -= field.textMP.preferredHeight + paragraphSpacing;
         }

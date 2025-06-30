@@ -80,6 +80,16 @@ public class AerodynamicModel : MonoBehaviour
         //Misc
         currentTemperature = ProjectUtilities.CalculateTemparatureAtAltitude(temperatureAtSeaLevel, transform.position);
 
+        TextFieldManager.Instance.CreateOrUpdateScreenField("AOA").Value($"AOA: {alpha:F1}");
+        TextFieldManager.Instance.CreateOrUpdateScreenField("Lift").Value($"Total Lift: {lift:F1}");
+        TextFieldManager.Instance.CreateOrUpdateScreenField("BenLift").Value($"Beneficial Lift: {beneficialLift:F1}");
+        TextFieldManager.Instance.CreateOrUpdateScreenField("BenLiftRatio").Value($"BL/L Ratio: {benLiftRatio:P0}"); // % formatýnda
+
+        TextFieldManager.Instance.CreateOrUpdateScreenField("Drag").Value($"Main Drag: {drag:F1}");
+        TextFieldManager.Instance.CreateOrUpdateScreenField("Induced").Value($"Induced Drag: {inducedDrag:F1}");
+        TextFieldManager.Instance.CreateOrUpdateScreenField("TotalDrag").Value($"Total Drag: {totalDrag:F1}");
+
+        TextFieldManager.Instance.CreateOrUpdateScreenField("Thrust").Value($"Thrust: {thrust * thrustMultiplier:F1}");
         //Lift
         liftValues.Clear();
         Vector3 totalLiftVector = Vector3.zero;
@@ -94,12 +104,12 @@ public class AerodynamicModel : MonoBehaviour
             UpdateValues(surface, force, VType.lift);
             rb.AddForceAtPosition(force * liftMultiplier * surface.surfaceLiftMultiplier, surface.transform.TransformPoint(surface.aerodynamicSurfaceObject.centerPoint));
             totalLiftVector += force;
-            
+            TextFieldManager.Instance.CreateOrUpdateWorldField(surface.name).Value("Lift: " + (int)force.magnitude).FontSize(0.1f).WorldPosition(surface.transform.position + surface.transform.up);
         }
-        lift = totalLiftVector.magnitude;
-        beneficialLift = CalculateBeneficialLift(totalLiftVector, velocity);
+        lift = totalLiftVector.magnitude * liftMultiplier;
+        beneficialLift = CalculateBeneficialLift(totalLiftVector * liftMultiplier, velocity);
         benLiftRatio = beneficialLift / lift;
-        inducedDrag = CalculateInducedDrag(totalLiftVector, -velocity);
+        inducedDrag = CalculateInducedDrag(totalLiftVector * liftMultiplier, -velocity);
         totalDrag = inducedDrag + drag;
         Debug.DrawLine(transform.position, transform.position + velocity.normalized * 10, Color.red, 0.01f);
         //Drag
@@ -117,7 +127,7 @@ public class AerodynamicModel : MonoBehaviour
             rb.AddForceAtPosition(force * dragMultiplier, surface.transform.TransformPoint(surface.aerodynamicSurfaceObject.centerPoint));
             totalDragVector += force;
         }
-        drag = totalDragVector.magnitude;
+        drag = totalDragVector.magnitude * dragMultiplier;
     }
 
     void InitializeValues()

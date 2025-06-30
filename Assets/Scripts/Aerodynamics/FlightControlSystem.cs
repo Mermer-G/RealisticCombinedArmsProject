@@ -178,7 +178,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         SpeedLocking();
         AddDataToPIDCurves();
         PreventFalling();
-
+        TextFieldManager.Instance.CreateOrUpdateScreenField("Turn Rate").Value($"Turn Rate: {angularVelocity.x * Mathf.Rad2Deg:F1}" + "Deg/Sec");
     }
 
     float smoothing = 0.1f; // Ayarlayabilirsin
@@ -398,7 +398,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
 
 
         Vector3 turnRateError = wantedAV - angularVelocity;
-        //print("Turn rate error: " + turnRateError);
+        
         if (PID)
         {
             var velocity = rb.velocity.magnitude;
