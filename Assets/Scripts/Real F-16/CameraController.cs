@@ -27,7 +27,10 @@ public class CameraController : MonoBehaviour
 
     bool control = true;
 
-    
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+    }
 
     private void Start()
     {
@@ -46,7 +49,7 @@ public class CameraController : MonoBehaviour
         }
         depthOfField = globalVolumeProfile.components[1] as DepthOfField;
         StartCoroutine(TransitionEffect(animationTime));
-        cameraChanged.Invoke(customCameras[activeCameraIndex].thisCamera);
+        cameraChanged?.Invoke(customCameras[activeCameraIndex].thisCamera);
     }
 
     // Update is called once per frame
