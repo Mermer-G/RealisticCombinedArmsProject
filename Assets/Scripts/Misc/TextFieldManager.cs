@@ -25,12 +25,12 @@ public class TextFieldManager : MonoBehaviour
     Dictionary<string, TextField> worldTextFields = new Dictionary<string, TextField>();
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if (Instance == null) Instance = this;
     }
 
-    private void OnEnable()
+    private void Start()
     {
         CameraController.instance.cameraChanged += HandleCameraChange;
     }
@@ -64,6 +64,7 @@ public class TextFieldManager : MonoBehaviour
 
         //Create a new one if not.
         screenTextFields.Add(id, new TextField());
+        print("Created a new field with id: " + id);
         return new TextFieldBuilder(screenTextFields[id], Instantiate(textFieldPrefab));
     }
 
@@ -114,7 +115,7 @@ public class TextFieldManager : MonoBehaviour
 }
 
 //If some stupid error happens in the future, try making this a class. 
-public struct TextField
+public class TextField
 {
     public Image backGround;
     public TextMeshProUGUI textMP;
@@ -141,7 +142,7 @@ public class TextFieldBuilder
         return field;
     }
 
-    public TextFieldBuilder Value(string value) { field.textMP.text = value; return this; }
+    public TextFieldBuilder Value(string value) { field.textMP.text = value; Debug.Log("Changed the value: " + value); return this; }
 
     public TextFieldBuilder WorldPosition(Vector3 position) { field.backGround.transform.position = position; return this; }
 
