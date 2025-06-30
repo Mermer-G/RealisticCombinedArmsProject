@@ -399,7 +399,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
 
 
         Vector3 turnRateError = wantedAV - angularVelocity;
-        print("Turn rate error: " + turnRateError);
+        //print("Turn rate error: " + turnRateError);
         if (PID)
         {
             var velocity = rb.velocity.magnitude;
@@ -515,7 +515,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     Vector3 AoALimiter(Vector3 CurrentAV)
     {
         float alpha = AerodynamicModel.alpha;
-        print("AOA: " + alpha);
+        //print("AOA: " + alpha);
 
         if (alpha > MaxAOALimit)
         {

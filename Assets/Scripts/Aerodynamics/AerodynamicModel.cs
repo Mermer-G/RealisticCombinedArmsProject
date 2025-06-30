@@ -161,7 +161,7 @@ public class AerodynamicModel : MonoBehaviour
         var direction = CalculateLiftDirection(surface);
         if (surface.CompareTag("Respawn"))
         {
-            print(surface.gameObject.name + ": " + alpha);
+            //print(surface.gameObject.name + ": " + alpha);
         }
         return (L * direction);
     }
