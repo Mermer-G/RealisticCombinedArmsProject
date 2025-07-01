@@ -9,11 +9,10 @@ public class CameraController : MonoBehaviour
 {
     public static CameraController instance;
     public CustomCamera[] customCameras;
-    public int activeCameraIndex = 0;
+    public int activeCameraIndex;
+    public int lastPrimaryCameraIndex;
 
     public Action<Camera> cameraChanged;
-
-    [SerializeField] RectTransform crosshair;
 
     Vector2 cameraInput = Vector2.zero;
 
@@ -24,6 +23,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] VolumeProfile globalVolumeProfile;
     DepthOfField depthOfField;
 
+    [SerializeField] Transform target;
 
     bool control = true;
 
@@ -52,20 +52,101 @@ public class CameraController : MonoBehaviour
         cameraChanged?.Invoke(customCameras[activeCameraIndex].thisCamera);
     }
 
+    bool secondaryCommandFlag = false;
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.C))
+
+        TextFieldManager.Instance.CreateOrUpdateScreenField("SecComFlag").Value(secondaryCommandFlag.ToString()).End();
+        if (Input.GetKey(KeyCode.C) && !secondaryCommandFlag)
         {
-            customCameras[activeCameraIndex].thisCamera.enabled = false;
-            StopCoroutine(TransitionEffect(animationTime));
-            StartCoroutine(TransitionEffect(animationTime));
+            //Command for switching to free camera
+            if (Input.GetKey(KeyCode.Alpha1))
+            {
+                if (customCameras[activeCameraIndex].cameraType == CustomCamera.CameraType.Free) return;
+                
+                secondaryCommandFlag = true;
+                int index = activeCameraIndex;
+                //We will find the free camera by linear search.
+                for (int i = 0;i < customCameras.Length; i++)
+                {
+                    if (customCameras[i].cameraGroup == CustomCamera.CameraGroup.Secondary && customCameras[i].cameraType == CustomCamera.CameraType.Free) 
+                    { 
+                        index = i;
+                        break;
+                    }
+                }
 
-            if (activeCameraIndex + 2 > customCameras.Length) activeCameraIndex = 0;
-            else activeCameraIndex++;
+                if (index != activeCameraIndex)
+                {
+                    lastPrimaryCameraIndex = activeCameraIndex;
+                    ChangeCamera(index);
+                }
+                else
+                    Debug.LogError("Free camera index could not be found in the list!");
+            }
+        }
 
-            customCameras[activeCameraIndex].thisCamera.enabled = true;
-            cameraChanged.Invoke(customCameras[activeCameraIndex].thisCamera);
+        if (Input.GetKeyUp(KeyCode.C))
+        {
+            if (secondaryCommandFlag)
+            {
+                secondaryCommandFlag = false;
+                return;
+            }
+
+            
+            //If the previous camera was primary
+            //search the list and find the next primary index.
+            if (customCameras[activeCameraIndex].cameraGroup == CustomCamera.CameraGroup.Primary)
+            {
+                int foundIndex = activeCameraIndex; // 1
+                bool jumpToStart = false;
+                int start;
+                //If it is at the last index start from the first index. 
+                if (activeCameraIndex + 1 >= customCameras.Length) start = 0;
+
+                //Can go the first index once.
+                else
+                {
+                    jumpToStart = true; //true
+                    start = activeCameraIndex + 1; //2
+                } 
+                        
+
+                for (int i = start; i < customCameras.Length; i++)
+                {
+                        
+                    //If found break the loop
+                    if (customCameras[i].cameraGroup == CustomCamera.CameraGroup.Primary)
+                    {
+                        foundIndex = i;
+                        break;
+                    }
+
+                    //If the next camera index is lower than the last go to the beginning once. 
+                    if (jumpToStart && i + 1 >= customCameras.Length)
+                    {
+                        i = -1;
+                        jumpToStart = false;
+                    }
+                }
+
+                if (foundIndex == activeCameraIndex)
+                {
+                    Debug.LogError("There is only one secondary camera in the list!");
+                }
+                else ChangeCamera(foundIndex);
+            }
+
+            //If the previous camera was secondary
+            //return to last primary index
+            else
+            {
+                ChangeCamera(lastPrimaryCameraIndex);
+            }
+            
+            
         }
 
         //Axis freedom
@@ -102,6 +183,8 @@ public class CameraController : MonoBehaviour
 
         //Zoom
         customCameras[activeCameraIndex].thisCamera.fieldOfView -= Input.GetAxis("Mouse ScrollWheel") * zoomSensivity;
+        customCameras[activeCameraIndex].targetObjectSize += Input.GetAxis("Mouse ScrollWheel") != 0 ? Mathf.Sign(Input.GetAxis("Mouse ScrollWheel")) : 0;
+        customCameras[activeCameraIndex].targetObjectSize = Math.Clamp(customCameras[activeCameraIndex].targetObjectSize, 0, 100);
         var a = customCameras[activeCameraIndex];
         customCameras[activeCameraIndex].thisCamera.fieldOfView = Mathf.Clamp(a.thisCamera.fieldOfView, a.minFov, a.maxFov);
 
@@ -114,8 +197,7 @@ public class CameraController : MonoBehaviour
         
 
         //Send input
-        customCameras[activeCameraIndex].ControlCamera(cameraInput);
-        
+        customCameras[activeCameraIndex].ControlCamera(cameraInput, target);
     }
 
     IEnumerator TransitionEffect(float duration)
@@ -135,6 +217,19 @@ public class CameraController : MonoBehaviour
         // Geçiş tamamlandığında (max değeri ulaşıldığında) son durumu ayarla
         depthOfField.focalLength.value = depthOfFieldCurve.Evaluate(max);
     }
+
+    void ChangeCamera(int index)
+    {
+        //Will set the current camera off and start a new transition effect.
+        customCameras[activeCameraIndex].thisCamera.enabled = false;
+        StopCoroutine(TransitionEffect(animationTime));
+        StartCoroutine(TransitionEffect(animationTime));
+
+        activeCameraIndex = index;
+
+        customCameras[activeCameraIndex].thisCamera.enabled = true;
+        cameraChanged.Invoke(customCameras[activeCameraIndex].thisCamera);
+    }
 }
 
 [Serializable]
@@ -151,13 +246,23 @@ public class CustomCamera
     public float sensivity;
     public CameraType cameraType;
     public AxisFreedom axisFreedom = AxisFreedom.None;
+    public CameraGroup cameraGroup;
+    public float targetObjectSize;
 
+    //There are two groups primary for tp and fov cameras
+    //And all the other ones will be as secondary
+    public enum CameraGroup
+    {
+        Primary,
+        Secondary
+    }
 
     Vector3 forwardVector = Vector3.zero;
     public enum CameraType
     {
         POV,
-        TP
+        TP,
+        Free
     }
 
     public enum AxisFreedom
@@ -170,7 +275,7 @@ public class CustomCamera
 
     Vector3 lastForward = Vector3.zero;
     Vector3 lookVector = Vector3.zero;
-    public void ControlCamera(Vector2 cameraInput)
+    public void ControlCamera(Vector2 cameraInput, Transform target = null)
     {
 
 
@@ -218,6 +323,40 @@ public class CustomCamera
             cameraInput.y = -cameraInput.y;
         }
 
+        if (cameraType == CameraType.Free && target != null)
+        {
+            Vector3 t = target.position + target.up + target.forward * 4;
+            Vector3 dir = t - thisCamera.transform.position;
+
+            AzimuthAxisObject.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            // --- ELEVATION (X ekseninde döner)
+            // Elevation objesi azimuth'a bağlıysa (parent-child)
+            Vector3 localDir = ElevationAxisObject.transform.parent.InverseTransformDirection(dir);
+            float elevationAngle = Mathf.Atan2(localDir.y, new Vector2(localDir.x, localDir.z).magnitude) * Mathf.Rad2Deg;
+            ElevationAxisObject.transform.localRotation = Quaternion.Euler(elevationAngle, 0, 0);
+
+            // 2. Sensör yüksekliğini al (Unity'de default = 24mm film → genelde 24mm)
+            float sensorHeight = thisCamera.sensorSize.y;
+
+            // 3. Objeye olan mesafe
+            float distance = dir.magnitude;
+
+            // 4. Objeye ait yükseklik (örneğin kapsül, karakter vb.)
+            float objectHeight = targetObjectSize;
+
+            TextFieldManager.Instance.CreateOrUpdateScreenField("Object Height").Value("Object Height: " + objectHeight);
+
+            // 5. Focal length hesapla (mm cinsinden)
+            float focalLength = (sensorHeight * distance) / objectHeight;
+
+            // 6. Clamp opsiyonel (örneğin aşırı zoom’dan kaçınmak için)
+            focalLength = Mathf.Clamp(focalLength, 10f, 2000f);
+
+            // 7. Uygula
+            thisCamera.focalLength = focalLength;
+
+            cameraInput = Vector2.zero;
+        }
 
         // Azimuth ekseninde dönüşü hesapla
         var azimuthRotation = ApplyValueToAxis(cameraInput.x, AzimuthAxisRelatedToObject);
@@ -227,6 +366,8 @@ public class CustomCamera
         var elevationRotation = ApplyValueToAxis(cameraInput.y, ElevationAxisRelatedToObject);
         ElevationAxisObject.transform.rotation = ElevationAxisObject.transform.rotation * elevationRotation;
 
+
+        //Constraints for POV
         if (cameraType == CameraType.POV)
         {
             //Azimuth Axis Lock
@@ -262,6 +403,7 @@ public class CustomCamera
 
         } 
 
+        //Constraints for TP
         if (cameraType == CameraType.TP)
         {
             //Elevation Axis Lock
