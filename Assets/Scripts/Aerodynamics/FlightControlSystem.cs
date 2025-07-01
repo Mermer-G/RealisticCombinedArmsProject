@@ -93,6 +93,10 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     [SerializeField] float MaxGLimit;
     [SerializeField] float MinGLimit;
 
+
+    [Header("Max Turn Rates (Maximum values, these do not come out from the FLCS)")]
+    [SerializeField] LandingGearGeneral landingGear;
+
     float iStoredP;
     float iStoredY;
     float iStoredR;
@@ -124,7 +128,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         /// <summary>
         /// Pilot input for Flaps
         /// </summary>
-        public bool f;
+        public float f;
 
         /// <summary>
         /// Pilot or FLCS input for Slats or LEF's
@@ -178,6 +182,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         SpeedLocking();
         AddDataToPIDCurves();
         PreventFalling();
+        ControlFlaps();
         TextFieldManager.Instance.CreateOrUpdateScreenField("Turn Rate").Value($"Turn Rate: {angularVelocity.x * Mathf.Rad2Deg:F1}" + "Deg/Sec");
     }
 
@@ -254,11 +259,6 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
 
         //Yaw decaying rate
         if (yawDecayingRate != 0) F16Input.y = Mathf.Lerp(F16Input.y, 0, yawDecayingRate);
-
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            F16Input.f = !F16Input.f;
-        }
 
         F16Input.s = ProjectUtilities.MapWithSign(AerodynamicModel.alpha, 0, 15, -0.08f, 1);
         F16Input.s = Mathf.Clamp(F16Input.s, -0.08f, 1);
@@ -466,7 +466,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     {
         pitchOutput?.Invoke(plinput.x);
         rollOutput?.Invoke(plinput.z);
-        flapAndRollOutput?.Invoke(plinput.f ? 1 : 0, plinput.z);
+        flapAndRollOutput?.Invoke(plinput.f, plinput.z);
         yawOutput?.Invoke(plinput.y);
         thrustOutput?.Invoke(plinput.t);
         slatOutput?.Invoke(plinput.s);
@@ -691,5 +691,23 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     public void ChangePowerStatusE(bool status)
     {
         isPowered = status;
+    }
+
+    void ControlFlaps()
+    {
+        if (landingGear.gearsDeployed)
+        {
+            var speed = rb.velocity.magnitude;
+            if(speed > 200 && speed < 250) F16Input.f = Mathf.Clamp(ProjectUtilities.Map(speed, 200, 250, 1, 0), 0, 1);
+
+            if (speed < 200 && speed > 100) F16Input.f = 1;
+
+            if (speed < 100 && speed > 75) F16Input.f = Mathf.Clamp(ProjectUtilities.Map(speed, 75, 100, 0, 1), 0, 1);
+        }
+
+        else
+        {
+            F16Input.f = 0;
+        }
     }
 }

@@ -6,6 +6,7 @@ public class QuickStarter : MonoBehaviour
     [SerializeField] bool quickStart;
     [SerializeField] int speed;
     [SerializeField] bool retractLandingGears;
+    [SerializeField] bool lockAxises;
     F110Engine F110Engine;
     FlightControlSystem FLCS;
 
@@ -22,7 +23,7 @@ public class QuickStarter : MonoBehaviour
     {
         if (quickStart)
         {
-            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+            if (lockAxises) GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             F110Engine = FindAnyObjectByType<F110Engine>();
             F110Engine.quickStart = true;
             GenericEventManager.Invoke("JFSStartSet", 2);

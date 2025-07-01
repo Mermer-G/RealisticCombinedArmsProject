@@ -45,6 +45,8 @@ public class LandingGearGeneral : MonoBehaviour, IHydraulicConsumer, IEnergyCons
     [SerializeField] float gearPressureUsePerSecond;
     [SerializeField] float currentSystemPressure;
 
+    public bool gearsDeployed = true;
+
     public string SystemIdH => systemIdH;
     public string NameH => gameObject.name;
     public bool IsActuatedH => isPoweredH;
@@ -83,7 +85,7 @@ public class LandingGearGeneral : MonoBehaviour, IHydraulicConsumer, IEnergyCons
         Landing
     }
 
-    bool gearsDeployed = true;
+    
     private float elapsed = 0f;
     private bool playing = false;
     bool reverse;
@@ -413,6 +415,6 @@ public class LandingGearGeneral : MonoBehaviour, IHydraulicConsumer, IEnergyCons
         }
     }
 
-    
+
     #endregion
 }
