@@ -250,7 +250,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
 
         F16Input.x += Input.GetAxis("Mouse Y") / inputSize; //* a;
         F16Input.z += Input.GetAxis("Mouse X") / inputSize; //* a;
-        F16Input.y += (Input.GetAxis("Horizontal") / inputSize); //* a;
+        F16Input.y += (Input.GetAxis("Yaw") / inputSize); //* a;
 
         //Yaw decaying rate
         if (yawDecayingRate != 0) F16Input.y = Mathf.Lerp(F16Input.y, 0, yawDecayingRate);
