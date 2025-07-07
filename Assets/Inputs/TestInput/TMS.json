@@ -1,0 +1,52 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "TMS",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "MoveUp",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "W",
+          "mapName": "TMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "MoveDown",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "S",
+          "mapName": "TMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "HoldFire",
+        "essential": false,
+        "trigger": {
+          "$type": "HoldForSecondsTrigger, Assembly-CSharp",
+          "keyCode": "Space",
+          "secondsForHolding": 2.0,
+          "mapName": "TMS",
+          "requiresUpdate": true
+        }
+      }
+    ]
+  }
+}

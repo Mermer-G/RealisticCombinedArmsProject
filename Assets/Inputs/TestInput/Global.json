@@ -1,0 +1,30 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "Global",
+  "isActive": true,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "ToggleTMS",
+        "essential": false,
+        "trigger": {
+          "$type": "HoldToActivateMapTrigger, Assembly-CSharp",
+          "keyCode": "Mouse4",
+          "targetMapName": "TMS",
+          "mapName": "Global",
+          "requiresUpdate": true
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$type": "InputContainer, Assembly-CSharp",
+  "containerName": "TestInput",
+  "inputMaps": {
+    "$type": "InputMap[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputMap, Assembly-CSharp",
+        "mapName": "TMS",
+        "isActive": false,
+        "RequiredMaps": {
+          "$type": "System.String[]",
+          "$values": []
+        },
+        "BlacklistedMaps": {
+          "$type": "System.String[]",
+          "$values": []
+        },
+        "inputActions": {
+          "$type": "InputAction[], Assembly-CSharp",
+          "$values": [
+            {
+              "$type": "InputAction, Assembly-CSharp",
+              "name": "MoveUp",
+              "essential": false,
+              "trigger": {
+                "$type": "KeyDownTrigger, Assembly-CSharp",
+                "keyCode": "W",
+                "mapName": "TMS",
+                "requiresUpdate": false
+              }
+            },
+            {
+              "$type": "InputAction, Assembly-CSharp",
+              "name": "MoveDown",
+              "essential": false,
+              "trigger": {
+                "$type": "KeyDownTrigger, Assembly-CSharp",
+                "keyCode": "S",
+                "mapName": "TMS",
+                "requiresUpdate": false
+              }
+            },
+            {
+              "$type": "InputAction, Assembly-CSharp",
+              "name": "HoldFire",
+              "essential": false,
+              "trigger": {
+                "$type": "HoldForSecondsTrigger, Assembly-CSharp",
+                "keyCode": "Space",
+                "secondsForholding": 2.0,
+                "mapName": "TMS",
+                "requiresUpdate": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "$type": "InputMap, Assembly-CSharp",
+        "mapName": "Global",
+        "isActive": true,
+        "RequiredMaps": {
+          "$type": "System.String[]",
+          "$values": []
+        },
+        "BlacklistedMaps": {
+          "$type": "System.String[]",
+          "$values": []
+        },
+        "inputActions": {
+          "$type": "InputAction[], Assembly-CSharp",
+          "$values": [
+            {
+              "$type": "InputAction, Assembly-CSharp",
+              "name": "ToggleTMS",
+              "essential": false,
+              "trigger": {
+                "$type": "HoldToActivateMapTrigger, Assembly-CSharp",
+                "keyCode": "Mouse4",
+                "targetMapName": "TMS",
+                "mapName": "Global",
+                "requiresUpdate": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
