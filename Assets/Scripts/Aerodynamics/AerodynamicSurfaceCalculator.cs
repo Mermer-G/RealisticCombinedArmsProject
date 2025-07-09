@@ -127,7 +127,7 @@ public class AerodynamicSurfaceCalculator : MonoBehaviour
 
     Vector3 CalculateTotalVelocity()
     {
-        var velocity = surface.transform.root.GetComponent<Rigidbody>().velocity;
+        var velocity = surface.transform.root.GetComponent<Rigidbody>().linearVelocity;
         var wind = incomingRelativeWind.normalized * relativeWindSpeed;
         return wind - velocity;
     }

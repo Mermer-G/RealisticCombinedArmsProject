@@ -54,7 +54,7 @@ public class AerodynamicSurface : MonoBehaviour
         if (childrenOfRoot == null)
         {
             Debug.Log("childrenOfRoot was null, creating a new list.");
-            childrenOfRoot = new List<GameObject>(); // Eðer null ise, yeni bir liste oluþturun
+            childrenOfRoot = new List<GameObject>(); // Eï¿½er null ise, yeni bir liste oluï¿½turun
         }
         childrenOfRoot.Clear();
         AddAllChildren(transform.root, childrenOfRoot);
@@ -120,7 +120,7 @@ public class AerodynamicSurfaceEditor : Editor
     public void OnSelectionChanged()
     {
         var surface = target as AerodynamicSurface;
-        if (Selection.activeGameObject != surface.gameObject) // Eðer hiçbir GameObject seçili deðilse
+        if (Selection.activeGameObject != surface.gameObject) // Eï¿½er hiï¿½bir GameObject seï¿½ili deï¿½ilse
         {
             serializedObject.Update();
             pivotEditing.boolValue = false;
@@ -287,14 +287,14 @@ public class AerodynamicSurfaceEditor : Editor
 
         
 
-        serializedObject.ApplyModifiedProperties(); // Deðiþiklikleri kaydet
+        serializedObject.ApplyModifiedProperties(); // Deï¿½iï¿½iklikleri kaydet
     }
     
     void CalculateMirroringSquare(MirroringAxis axis, float size, Transform transform)
     {
         Vector3 right = Vector3.zero, up = Vector3.zero;
 
-        // Ana eksene baðlý olarak düzlem belirleme
+        // Ana eksene baï¿½lï¿½ olarak dï¿½zlem belirleme
         switch (axis)
         {
             case MirroringAxis.None:
@@ -316,15 +316,15 @@ public class AerodynamicSurfaceEditor : Editor
                 break;            
         }
 
-        // Orta noktadan uzaklaþarak 4 köþe noktayý hesapla
+        // Orta noktadan uzaklaï¿½arak 4 kï¿½ï¿½e noktayï¿½ hesapla
         Vector3 center = transform.position;
         float halfSize = size / 2f;
 
         Vector3[] points = new Vector3[4];
-        points[0] = center + (right * halfSize) + (up * halfSize);  // Sað üst
-        points[1] = center - (right * halfSize) + (up * halfSize);  // Sol üst
+        points[0] = center + (right * halfSize) + (up * halfSize);  // Saï¿½ ï¿½st
+        points[1] = center - (right * halfSize) + (up * halfSize);  // Sol ï¿½st
         points[2] = center - (right * halfSize) - (up * halfSize);  // Sol alt
-        points[3] = center + (right * halfSize) - (up * halfSize);  // Sað alt
+        points[3] = center + (right * halfSize) - (up * halfSize);  // Saï¿½ alt
 
         
         Handles.DrawAAConvexPolygon(points);
@@ -350,9 +350,8 @@ public class AerodynamicSurfaceEditor : Editor
                 var point = pointList[i];
 
                 EditorGUI.BeginChangeCheck();
-                var newPos = surface.transform.InverseTransformPoint(
+                var fmh_355_21_638876702397911659 = Quaternion.identity; var newPos = surface.transform.InverseTransformPoint(
                     Handles.FreeMoveHandle(surface.transform.TransformPoint(point),
-                    Quaternion.identity,
                     surfaceObject.cornerVertexSize,
                     Vector3.zero,
                     Handles.SphereHandleCap)
@@ -483,15 +482,15 @@ public class AerodynamicSurfaceEditor : Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Aerodynamic Surface Object", EditorStyles.boldLabel);
 
-            // Eðer önceden oluþturulmadýysa, CreateEditor ile oluþtur
+            // Eï¿½er ï¿½nceden oluï¿½turulmadï¿½ysa, CreateEditor ile oluï¿½tur
             if (surfaceEditor == null)
             {
                 surfaceEditor = CreateEditor(script.aerodynamicSurfaceObject);
             }
 
-            // ScriptableObject'in Inspector içeriðini çiz
+            // ScriptableObject'in Inspector iï¿½eriï¿½ini ï¿½iz
             surfaceEditor.OnInspectorGUI();
-            // **Inspector'ý güncelle** (yeniden çizdir)
+            // **Inspector'ï¿½ gï¿½ncelle** (yeniden ï¿½izdir)
             Repaint();
         }
     }
@@ -537,7 +536,7 @@ public class AerodynamicSurfaceEditor : Editor
         Handles.color = Color.black;
 
 
-        // Yeni bir GUIStyle oluþtur
+        // Yeni bir GUIStyle oluï¿½tur
         GUIStyle labelStyle = new GUIStyle();
         labelStyle.fontSize = surfaceObject.fontSize;
         labelStyle.normal.textColor = surfaceObject.fontColor;
@@ -553,24 +552,24 @@ public class AerodynamicSurfaceEditor : Editor
     float CalculatePolygonArea3D(List<Vector3> points)
     {
         int n = points.Count;
-        if (n < 3) return 0; // En az 3 nokta olmalý
+        if (n < 3) return 0; // En az 3 nokta olmalï¿½
 
-        // Çokgenin normalini hesapla (ilk üç nokta ile)
+        // ï¿½okgenin normalini hesapla (ilk ï¿½ï¿½ nokta ile)
         Vector3 normal = Vector3.Cross(points[1] - points[0], points[2] - points[0]).normalized;
 
-        // En baskýn ekseni bul (XY, XZ veya YZ düzlemine projekte etmek için)
+        // En baskï¿½n ekseni bul (XY, XZ veya YZ dï¿½zlemine projekte etmek iï¿½in)
         Vector3 absNormal = new Vector3(Mathf.Abs(normal.x), Mathf.Abs(normal.y), Mathf.Abs(normal.z));
         int dominantAxis = absNormal.x > absNormal.y
             ? (absNormal.x > absNormal.z ? 0 : 2) // X mi Z mi?
             : (absNormal.y > absNormal.z ? 1 : 2); // Y mi Z mi?
 
-        // 3D noktalarý 2D'ye dönüþtür (Shoelace için)
+        // 3D noktalarï¿½ 2D'ye dï¿½nï¿½ï¿½tï¿½r (Shoelace iï¿½in)
         List<Vector2> projectedPoints = new List<Vector2>();
         foreach (Vector3 p in points)
         {
-            if (dominantAxis == 0) projectedPoints.Add(new Vector2(p.y, p.z)); // X baskýn -> (Y, Z) kullan
-            else if (dominantAxis == 1) projectedPoints.Add(new Vector2(p.x, p.z)); // Y baskýn -> (X, Z) kullan
-            else projectedPoints.Add(new Vector2(p.x, p.y)); // Z baskýn -> (X, Y) kullan
+            if (dominantAxis == 0) projectedPoints.Add(new Vector2(p.y, p.z)); // X baskï¿½n -> (Y, Z) kullan
+            else if (dominantAxis == 1) projectedPoints.Add(new Vector2(p.x, p.z)); // Y baskï¿½n -> (X, Z) kullan
+            else projectedPoints.Add(new Vector2(p.x, p.y)); // Z baskï¿½n -> (X, Y) kullan
         }
 
         // 2D Shoelace Teoremi ile alan hesapla
@@ -578,7 +577,7 @@ public class AerodynamicSurfaceEditor : Editor
         for (int i = 0; i < n; i++)
         {
             Vector2 p1 = projectedPoints[i];
-            Vector2 p2 = projectedPoints[(i + 1) % n]; // Son noktadan ilk noktaya dön
+            Vector2 p2 = projectedPoints[(i + 1) % n]; // Son noktadan ilk noktaya dï¿½n
             area += (p1.x * p2.y) - (p2.x * p1.y);
         }
 

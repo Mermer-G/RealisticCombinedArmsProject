@@ -83,7 +83,7 @@ public class AerodynamicModel : MonoBehaviour
         TextFieldManager.Instance.CreateOrUpdateScreenField("AOA").Value($"AOA: {alpha:F1}");
         TextFieldManager.Instance.CreateOrUpdateScreenField("Lift").Value($"Total Lift: {lift:F1}");
         TextFieldManager.Instance.CreateOrUpdateScreenField("BenLift").Value($"Beneficial Lift: {beneficialLift:F1}");
-        TextFieldManager.Instance.CreateOrUpdateScreenField("BenLiftRatio").Value($"BL/L Ratio: {benLiftRatio:P0}"); // % formatýnda
+        TextFieldManager.Instance.CreateOrUpdateScreenField("BenLiftRatio").Value($"BL/L Ratio: {benLiftRatio:P0}"); // % formatï¿½nda
 
         TextFieldManager.Instance.CreateOrUpdateScreenField("Drag").Value($"Main Drag: {drag:F1}");
         TextFieldManager.Instance.CreateOrUpdateScreenField("Induced").Value($"Induced Drag: {inducedDrag:F1}");
@@ -276,32 +276,32 @@ public class AerodynamicModel : MonoBehaviour
     #region Misc
     Vector3 CalculateRelativeAirFlow(Vector3 position)
     {
-        Vector3 r = transform.position - position;  // Yüzeyin gövdeye uzaklýðý
-        Vector3 additionalVelocity = Vector3.Cross(rb.angularVelocity, r * 10); // Açýsal hýzdan gelen ek hava akýþý
-        return additionalVelocity - rb.velocity;
+        Vector3 r = transform.position - position;  // Yï¿½zeyin gï¿½vdeye uzaklï¿½ï¿½ï¿½
+        Vector3 additionalVelocity = Vector3.Cross(rb.angularVelocity, r * 10); // Aï¿½ï¿½sal hï¿½zdan gelen ek hava akï¿½ï¿½ï¿½
+        return additionalVelocity - rb.linearVelocity;
     }
     
     float CalculatePolygonArea3D(List<Vector3> points)
     {
         int n = points.Count;
-        if (n < 3) return 0; // En az 3 nokta olmalý
+        if (n < 3) return 0; // En az 3 nokta olmalï¿½
 
-        // Çokgenin normalini hesapla (ilk üç nokta ile)
+        // ï¿½okgenin normalini hesapla (ilk ï¿½ï¿½ nokta ile)
         Vector3 normal = Vector3.Cross(points[1] - points[0], points[2] - points[0]).normalized;
 
-        // En baskýn ekseni bul (XY, XZ veya YZ düzlemine projekte etmek için)
+        // En baskï¿½n ekseni bul (XY, XZ veya YZ dï¿½zlemine projekte etmek iï¿½in)
         Vector3 absNormal = new Vector3(Mathf.Abs(normal.x), Mathf.Abs(normal.y), Mathf.Abs(normal.z));
         int dominantAxis = absNormal.x > absNormal.y
             ? (absNormal.x > absNormal.z ? 0 : 2) // X mi Z mi?
             : (absNormal.y > absNormal.z ? 1 : 2); // Y mi Z mi?
 
-        // 3D noktalarý 2D'ye dönüþtür (Shoelace için)
+        // 3D noktalarï¿½ 2D'ye dï¿½nï¿½ï¿½tï¿½r (Shoelace iï¿½in)
         List<Vector2> projectedPoints = new List<Vector2>();
         foreach (Vector3 p in points)
         {
-            if (dominantAxis == 0) projectedPoints.Add(new Vector2(p.y, p.z)); // X baskýn -> (Y, Z) kullan
-            else if (dominantAxis == 1) projectedPoints.Add(new Vector2(p.x, p.z)); // Y baskýn -> (X, Z) kullan
-            else projectedPoints.Add(new Vector2(p.x, p.y)); // Z baskýn -> (X, Y) kullan
+            if (dominantAxis == 0) projectedPoints.Add(new Vector2(p.y, p.z)); // X baskï¿½n -> (Y, Z) kullan
+            else if (dominantAxis == 1) projectedPoints.Add(new Vector2(p.x, p.z)); // Y baskï¿½n -> (X, Z) kullan
+            else projectedPoints.Add(new Vector2(p.x, p.y)); // Z baskï¿½n -> (X, Y) kullan
         }
 
         // 2D Shoelace Teoremi ile alan hesapla
@@ -309,7 +309,7 @@ public class AerodynamicModel : MonoBehaviour
         for (int i = 0; i < n; i++)
         {
             Vector2 p1 = projectedPoints[i];
-            Vector2 p2 = projectedPoints[(i + 1) % n]; // Son noktadan ilk noktaya dön
+            Vector2 p2 = projectedPoints[(i + 1) % n]; // Son noktadan ilk noktaya dï¿½n
             area += (p1.x * p2.y) - (p2.x * p1.y);
         }
 
@@ -331,7 +331,7 @@ public class AerodynamicModel : MonoBehaviour
                 var projectedFVector = Vector3.ProjectOnPlane(subSurface.transform.forward, surface.transform.right);
                 var angle = -Vector3.SignedAngle(surface.transform.forward, projectedFVector, transform.right);
 
-                //Ýstediðim açýya ne kadar yakýnsa o kadar 1 'e yaklaþacak.
+                //ï¿½stediï¿½im aï¿½ï¿½ya ne kadar yakï¿½nsa o kadar 1 'e yaklaï¿½acak.
                 //Flap max angle = 30
                 var effect = angle / 30;
 
@@ -359,7 +359,7 @@ public class AerodynamicModel : MonoBehaviour
                 var angle = Vector3.SignedAngle(surface.transform.forward, projectedFVector, transform.right);
                 //angle = Mathf.Abs(angle);
 
-                //Ýstediðim açýya ne kadar yakýnsa o kadar 1 'e yaklaþacak.
+                //ï¿½stediï¿½im aï¿½ï¿½ya ne kadar yakï¿½nsa o kadar 1 'e yaklaï¿½acak.
                 //Slat max angle = 25
                 var effect = angle / 25;
 
@@ -385,7 +385,7 @@ public class AerodynamicModel : MonoBehaviour
                 var angle = -Vector3.SignedAngle(surface.transform.forward, projectedFVector, transform.right);
                 //angle = Mathf.Abs(angle);
 
-                //Ýstediðim açýya ne kadar yakýnsa o kadar 1 'e yaklaþacak.
+                //ï¿½stediï¿½im aï¿½ï¿½ya ne kadar yakï¿½nsa o kadar 1 'e yaklaï¿½acak.
                 //Flap max angle = 30
                 var effect = angle / 30;
                 switch (type)
@@ -433,8 +433,8 @@ public class AerodynamicModel : MonoBehaviour
             return;
         }
         GetAllSurfacesInChildren();
-        velocity = rb.velocity;
-        speed = rb.velocity.magnitude;
+        velocity = rb.linearVelocity;
+        speed = rb.linearVelocity.magnitude;
         var newAlpha = CalculateAlpha(transform);
         alpha = Mathf.Lerp(alpha, newAlpha, 0.01f);
         engineRPMPercent = engine.RPMPercent;
@@ -489,7 +489,7 @@ public class AerodynamicModel : MonoBehaviour
 
     private void Awake()
     {
-        lastVelocity = rb.velocity;
+        lastVelocity = rb.linearVelocity;
         rb = GetComponent<Rigidbody>();
         if (Application.isPlaying)
             temperatureAtSeaLevel = ProjectUtilities.CalculateTemparatureAtSeaLevel(currentTemperature, transform.position);
@@ -510,7 +510,7 @@ public class AerodynamicModel : MonoBehaviour
 
     void ShowAcceleration()
     {
-        Vector3 currentVelocity = rb.velocity;
+        Vector3 currentVelocity = rb.linearVelocity;
         float deltaTime = Time.fixedDeltaTime;
 
         acceleration = (currentVelocity - lastVelocity) / deltaTime;

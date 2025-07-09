@@ -34,7 +34,7 @@ public class QuickStarter : MonoBehaviour
             GenericEventManager.Invoke<float>("1-HUDAlphaSet", 1);
             GenericEventManager.Invoke<int>("MMCSet", 0);
             if(retractLandingGears) GenericEventManager.Invoke<int>("SetLandingGears", 0);
-            GetComponent<Rigidbody>().velocity = transform.forward * speed;
+            GetComponent<Rigidbody>().linearVelocity = transform.forward * speed;
             quickStart = false;
         }
         

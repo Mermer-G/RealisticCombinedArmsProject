@@ -76,7 +76,7 @@ public class PitchLadder : MonoBehaviour
         //MainAxis
         Vector3 axis;
         if (!axisBoreSight)
-            axis = Vector3.ProjectOnPlane(rb.velocity.normalized * 100, Vector3.up).normalized;
+            axis = Vector3.ProjectOnPlane(rb.linearVelocity.normalized * 100, Vector3.up).normalized;
         else
             axis= Vector3.ProjectOnPlane(aircraft.transform.forward * 100, Vector3.up).normalized;
 

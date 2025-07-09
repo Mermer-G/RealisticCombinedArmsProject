@@ -262,7 +262,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
 
         F16Input.s = ProjectUtilities.MapWithSign(AerodynamicModel.alpha, 0, 15, -0.08f, 1);
         F16Input.s = Mathf.Clamp(F16Input.s, -0.08f, 1);
-        if (rb.velocity.magnitude < 30) F16Input.s = 0;
+        if (rb.linearVelocity.magnitude < 30) F16Input.s = 0;
 
         var upSnap = Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.W);
         var downSnap = Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.S);
@@ -392,7 +392,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         Vector3 wantedAV = SetWantedTurnRates(new Vector3(plinput.x, plinput.y, plinput.z));
         
 
-        if (LimitG) wantedAV = Glimiter(rb.velocity.magnitude, angularVelocity, wantedAV); //LimitAngularVelocity(rb.velocity.magnitude, angularVelocity, 9, -4.5f); 
+        if (LimitG) wantedAV = Glimiter(rb.linearVelocity.magnitude, angularVelocity, wantedAV); //LimitAngularVelocity(rb.velocity.magnitude, angularVelocity, 9, -4.5f); 
 
         if (LimitAoA) wantedAV = AoALimiter(wantedAV);
 
@@ -401,7 +401,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         
         if (PID)
         {
-            var velocity = rb.velocity.magnitude;
+            var velocity = rb.linearVelocity.magnitude;
             //Pitch
             if (UseGainsFromCurves)
             {
@@ -579,28 +579,28 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     {
         if(Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad7))
         {
-            PitchP.AddKey((int)rb.velocity.magnitude, pGain);
-            PitchI.AddKey((int)rb.velocity.magnitude, iGain);
-            PitchISat.AddKey((int)rb.velocity.magnitude, iSaturation);
-            PitchD.AddKey((int)rb.velocity.magnitude, dGain);
+            PitchP.AddKey((int)rb.linearVelocity.magnitude, pGain);
+            PitchI.AddKey((int)rb.linearVelocity.magnitude, iGain);
+            PitchISat.AddKey((int)rb.linearVelocity.magnitude, iSaturation);
+            PitchD.AddKey((int)rb.linearVelocity.magnitude, dGain);
             print("Value added to pitch curves");
         }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad8))
         {
-            YawP.AddKey((int)rb.velocity.magnitude, pGain);
-            YawI.AddKey((int)rb.velocity.magnitude, iGain);
-            YawISat.AddKey((int)rb.velocity.magnitude, iSaturation);
-            YawD.AddKey((int)rb.velocity.magnitude, dGain);
+            YawP.AddKey((int)rb.linearVelocity.magnitude, pGain);
+            YawI.AddKey((int)rb.linearVelocity.magnitude, iGain);
+            YawISat.AddKey((int)rb.linearVelocity.magnitude, iSaturation);
+            YawD.AddKey((int)rb.linearVelocity.magnitude, dGain);
             print("Value added to yaw curves");
         }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad9))
         {
-            RollP.AddKey((int)rb.velocity.magnitude, pGain);
-            RollI.AddKey((int)rb.velocity.magnitude, iGain);
-            RollISat.AddKey((int)rb.velocity.magnitude, iSaturation);
-            RollD.AddKey((int)rb.velocity.magnitude, dGain);
+            RollP.AddKey((int)rb.linearVelocity.magnitude, pGain);
+            RollI.AddKey((int)rb.linearVelocity.magnitude, iGain);
+            RollISat.AddKey((int)rb.linearVelocity.magnitude, iSaturation);
+            RollD.AddKey((int)rb.linearVelocity.magnitude, dGain);
             print("Value added to roll curves");
         }
     }
@@ -647,7 +647,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetAxis("Mouse ScrollWheel") != 0) speedLockVelocity += Math.Sign(Input.GetAxis("Mouse ScrollWheel")) * 5;
 
         if (!enableSpeedLocking) return;
-        rb.velocity = rb.velocity.normalized * speedLockVelocity * 0.514444f;
+        rb.linearVelocity = rb.linearVelocity.normalized * speedLockVelocity * 0.514444f;
     }
 
     void PreventFalling()
@@ -656,8 +656,8 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
 
         if (!preventFalling) return;
 
-        var magnitude = Vector3.Dot(Vector3.up, rb.velocity);
-        rb.velocity += Vector3.up * -magnitude;
+        var magnitude = Vector3.Dot(Vector3.up, rb.linearVelocity);
+        rb.linearVelocity += Vector3.up * -magnitude;
     }
 
     #endregion
@@ -697,7 +697,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     {
         if (landingGear.gearsDeployed)
         {
-            var speed = rb.velocity.magnitude;
+            var speed = rb.linearVelocity.magnitude;
             if(speed > 200 && speed < 250) F16Input.f = Mathf.Clamp(ProjectUtilities.Map(speed, 200, 250, 1, 0), 0, 1);
 
             if (speed < 200 && speed > 100) F16Input.f = 1;
