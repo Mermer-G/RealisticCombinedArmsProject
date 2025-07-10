@@ -1,0 +1,51 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "CameraControl",
+  "isActive": true,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["RDR-MAN RNG"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "CameraVertical",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse Y",
+          "mapName": "CameraControl",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "CameraHorizontal",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse X",
+          "mapName": "CameraControl",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "CameraZoom",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse ScrollWheel",
+          "mapName": "CameraControl",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

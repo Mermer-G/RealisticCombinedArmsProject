@@ -35,7 +35,6 @@ public class InputManager : MonoBehaviour
 
 
     bool value1 = false;
-    bool value2 = false;
 
     // Update is called once per frame
     void Update()
@@ -44,9 +43,6 @@ public class InputManager : MonoBehaviour
 
         if (GetInput("MoveUp") == 1 ? true : false) value1 = !value1;
         TextFieldManager.Instance.CreateOrUpdateScreenField("W").Value("W value: " + value1).End();
-
-        //value2 = GetInput("HoldFire") == 1 ? true : false;
-        //TextFieldManager.Instance.CreateOrUpdateScreenField("Space").Value("Space value: " + value2).End();
 
         if (UnityEngine.Input.GetKeyDown(KeyCode.N)) SaveMaps("TestInput");
     }
@@ -68,8 +64,13 @@ public class InputManager : MonoBehaviour
 
         if (!map.isActive) return 0;
 
-        Debug.Log("requested input for: " + actionName + "value is: " + actions[actionName].trigger.GetValue());
+        foreach (var blackListed in maps[actions[actionName].trigger.mapName].BlacklistedMaps)
+        {
+            if (maps[blackListed].isActive) return 0;
+        }
 
+        Debug.Log("requested input for: " + actionName + "value is: " + actions[actionName].trigger.GetValue());
+        
         return actions[actionName].trigger.GetValue();
     }
 

@@ -8,7 +8,6 @@ public class InputTrigger
     public virtual void UpdateTrigger() { return; }
 }
 
-//Bu yapýlan triggerlardan bir tanesi ve bu input action içinde saklanabilir olmalý.
 public class KeyDownTrigger : InputTrigger
 {
     public KeyCode keyCode;   
@@ -16,6 +15,36 @@ public class KeyDownTrigger : InputTrigger
     public override float GetValue()
     {
         return Input.GetKeyDown(keyCode) ? 1 : 0;
+    }
+
+    public override void UpdateTrigger()
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+public class KeyHoldTrigger : InputTrigger
+{
+    public KeyCode keyCode;
+
+    public override float GetValue()
+    {
+        return Input.GetKey(keyCode) ? 1 : 0;
+    }
+
+    public override void UpdateTrigger()
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+public class AxisTrigger : InputTrigger
+{
+    public string axis;
+
+    public override float GetValue()
+    {
+        return Input.GetAxis(axis);
     }
 
     public override void UpdateTrigger()

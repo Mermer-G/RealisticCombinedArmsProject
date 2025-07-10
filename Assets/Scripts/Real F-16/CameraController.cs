@@ -178,12 +178,12 @@ public class CameraController : MonoBehaviour
         else control = true;
 
         //Input
-        if (control) cameraInput = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+        if (control) cameraInput = new Vector2(InputManager.instance.GetInput("CameraHorizontal"), InputManager.instance.GetInput("CameraVertical"));
         else cameraInput = Vector2.zero;
 
         //Zoom
-        customCameras[activeCameraIndex].thisCamera.fieldOfView -= Input.GetAxis("Mouse ScrollWheel") * zoomSensivity;
-        customCameras[activeCameraIndex].targetObjectSize += Input.GetAxis("Mouse ScrollWheel") != 0 ? Mathf.Sign(Input.GetAxis("Mouse ScrollWheel")) : 0;
+        customCameras[activeCameraIndex].thisCamera.fieldOfView -= InputManager.instance.GetInput("CameraZoom") * zoomSensivity;
+        customCameras[activeCameraIndex].targetObjectSize += InputManager.instance.GetInput("CameraZoom") != 0 ? Mathf.Sign(InputManager.instance.GetInput("CameraZoom")) : 0;
         customCameras[activeCameraIndex].targetObjectSize = Math.Clamp(customCameras[activeCameraIndex].targetObjectSize, 0, 100);
         var a = customCameras[activeCameraIndex];
         customCameras[activeCameraIndex].thisCamera.fieldOfView = Mathf.Clamp(a.thisCamera.fieldOfView, a.minFov, a.maxFov);

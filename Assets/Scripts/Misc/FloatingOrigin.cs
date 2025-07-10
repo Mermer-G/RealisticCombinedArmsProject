@@ -95,7 +95,7 @@ public class FloatingOrigin : MonoBehaviour
 
     private void MoveTrailRenderers(Vector3 offset)
     {
-        var trails = FindObjectsOfType<TrailRenderer>() as TrailRenderer[];
+        var trails = FindObjectsByType<TrailRenderer>(FindObjectsSortMode.None);
         foreach (var trail in trails)
         {
             Vector3[] positions = new Vector3[trail.positionCount];
@@ -110,7 +110,7 @@ public class FloatingOrigin : MonoBehaviour
 
     private void MoveLineRenderers(Vector3 offset)
     {
-        var lines = FindObjectsOfType<LineRenderer>() as LineRenderer[];
+        var lines = FindObjectsByType<LineRenderer>(FindObjectsSortMode.None);
         foreach (var line in lines)
         {
             Vector3[] positions = new Vector3[line.positionCount];
@@ -125,7 +125,7 @@ public class FloatingOrigin : MonoBehaviour
 
     private void MoveParticles(Vector3 offset)
     {
-        var particles = FindObjectsOfType<ParticleSystem>() as ParticleSystem[];
+        var particles = FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None);
         foreach (ParticleSystem system in particles)
         {
             if (system.main.simulationSpace != ParticleSystemSimulationSpace.World)

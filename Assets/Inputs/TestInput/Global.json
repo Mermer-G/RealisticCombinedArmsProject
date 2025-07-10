@@ -24,6 +24,18 @@
           "mapName": "Global",
           "requiresUpdate": true
         }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "ToggleRDRMAN",
+        "essential": false,
+        "trigger": {
+          "$type": "HoldToActivateMapTrigger, Assembly-CSharp",
+          "keyCode": "X",
+          "targetMapName": "RDR-MAN RNG",
+          "mapName": "Global",
+          "requiresUpdate": true
+        }
       }
     ]
   }

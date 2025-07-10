@@ -1,0 +1,62 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "RDR-MAN RNG",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "RDRVertical",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse Y",
+          "mapName": "RDR-MAN RNG",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "RDRHorizontal",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse X",
+          "mapName": "RDR-MAN RNG",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "MANRNG",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse ScrollWheel",
+          "mapName": "RDR-MAN RNG",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "MANRNGDepress",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "Mouse3",
+          "mapName": "RDR-MAN RNG",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

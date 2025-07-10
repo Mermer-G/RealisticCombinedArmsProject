@@ -111,7 +111,7 @@ public class AerodynamicModel : MonoBehaviour
         benLiftRatio = beneficialLift / lift;
         inducedDrag = CalculateInducedDrag(totalLiftVector * liftMultiplier, -velocity);
         totalDrag = inducedDrag + drag;
-        Debug.DrawLine(transform.position, transform.position + velocity.normalized * 10, Color.red, 0.01f);
+
         //Drag
         dragValues.Clear();
         Vector3 totalDragVector = Vector3.zero;
@@ -195,8 +195,8 @@ public class AerodynamicModel : MonoBehaviour
         var cl_alpha_graph = surface.aerodynamicSurfaceObject.xfoildata.clCurve;
         Vector2 scale = CalculateScales(surface, VType.lift);
         //ProjectUtilities.ManipulateGraph(cl_alpha_graph, ref tempLiftCurve, scale.x, scale.y, true);
-        cl_alpha_graph = ProjectUtilities.ManipulateGraphReturn(cl_alpha_graph, scale.x, scale.y, true);
-        var maincl = cl_alpha_graph.Evaluate(alpha);
+        //cl_alpha_graph = ProjectUtilities.ManipulateGraphReturn(cl_alpha_graph, scale.x, scale.y, true);
+        var maincl = cl_alpha_graph.Evaluate(alpha / scale.x) * scale.y;
         var cl = maincl + CalculateAdditionalCl(surface, 1f) + CalculateLERXAddition(surface, alpha, maincl);
         //var cl = cl_alpha_graph.Evaluate(alpha) + CalculateAdditionalCl(surface, 1f);
         var AR = surface.aerodynamicSurfaceObject.aspectRatio;
@@ -242,9 +242,9 @@ public class AerodynamicModel : MonoBehaviour
         var cd_alpha_graph = surface.aerodynamicSurfaceObject.xfoildata.cdCurve;
         Vector2 scale = CalculateScales(surface, VType.drag);
         //ProjectUtilities.ManipulateGraph(cd_alpha_graph, ref tempDragCurve, scale.x, scale.y, true);
-        cd_alpha_graph = ProjectUtilities.ManipulateGraphReturn(cd_alpha_graph, scale.x, scale.y, true);
+        //cd_alpha_graph = ProjectUtilities.ManipulateGraphReturn(cd_alpha_graph, scale.x, scale.y, true);
         var alpha = CalculateAlpha(surface);
-        var CD = cd_alpha_graph.Evaluate(alpha);
+        var CD = cd_alpha_graph.Evaluate(alpha / scale.x) * scale.y;
         var rho = ProjectUtilities.CalculateAirDensity(surface.transform.position, currentTemperature);
         var wingArea = CalculatePolygonArea3D(surface.aerodynamicSurfaceObject.localPoints);
         var inversedVelocity = -velocity;//CalculateRelativeAirFlow(surface.transform.position);
@@ -331,7 +331,6 @@ public class AerodynamicModel : MonoBehaviour
                 var projectedFVector = Vector3.ProjectOnPlane(subSurface.transform.forward, surface.transform.right);
                 var angle = -Vector3.SignedAngle(surface.transform.forward, projectedFVector, transform.right);
 
-                //�stedi�im a��ya ne kadar yak�nsa o kadar 1 'e yakla�acak.
                 //Flap max angle = 30
                 var effect = angle / 30;
 

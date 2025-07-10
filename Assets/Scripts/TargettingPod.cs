@@ -102,6 +102,7 @@ public class TargettingPod : MonoBehaviour
                 DoAbsoluteGravityAlign(trackingPositions[currentTrackingPosition]);
             }
         }
+        Render();
     }
 
     public void ClearOutRenderTexture(RenderTexture renderTexture)
@@ -125,7 +126,7 @@ public class TargettingPod : MonoBehaviour
         if (enableRendering && consumer.IsPoweredE)
         {
             podCamera.Render();
-            Debug.Log("Rendering!");
+            //Debug.Log("Rendering!");
         }
         else
         {
@@ -136,7 +137,7 @@ public class TargettingPod : MonoBehaviour
     private void FixedUpdate()
     {
         ControlByState();
-        Render();
+        
         switch (state)
         {
             case TGPState.Test:
@@ -243,51 +244,26 @@ public class TargettingPod : MonoBehaviour
     }
 
 
-    int currentZoom = 0;
+    float currentZoom = 0;
     void Zoom()
     {
         if (Input.GetKeyDown(KeyCode.KeypadPlus)) currentZoom++;
         if (Input.GetKeyDown(KeyCode.KeypadMinus)) currentZoom--;
 
-        currentZoom = Math.Clamp(currentZoom, 0, 5);
 
-        switch (currentZoom)
-        {
-            case 0:
-                podCamera.focalLength = 60;
-                break;
-            case 1:
-                podCamera.focalLength = 60 * 5;
-                break;
-            case 2:
-                podCamera.focalLength = 60 * 10;
-                break;
-            case 3:
-                podCamera.focalLength = 60 * 25;
-                break;
-            case 4:
-                podCamera.focalLength = 60 * 50;
-                break;
-            case 5:
-                podCamera.focalLength = 60 * 100;
-                break;
-        }
+        currentZoom += InputManager.instance.GetInput("MANRNG") * 5;
+        currentZoom = Math.Clamp(currentZoom, 1, 100);
 
+        podCamera.focalLength = 60 * currentZoom;
     }
     Vector3 horizontalAxis;
     Vector3 verticalAxis;
     Vector3 AdvencedControl()
     {
-        float horizontal;
-        if (Input.GetKey(KeyCode.RightArrow)) horizontal = 1;
-        else if (Input.GetKey(KeyCode.LeftArrow)) horizontal = -1;
-        else horizontal = 0;
+        float horizontal = InputManager.instance.GetInput("RDRHorizontal");
         horizontal *= 20 / podCamera.focalLength;
 
-        float vertical;
-        if (Input.GetKey(KeyCode.UpArrow)) vertical = 1;
-        else if (Input.GetKey(KeyCode.DownArrow)) vertical = -1;
-        else vertical = 0;
+        float vertical = InputManager.instance.GetInput("RDRVertical");
         vertical *= 20 / podCamera.focalLength;
 
 
@@ -321,17 +297,11 @@ public class TargettingPod : MonoBehaviour
     Vector3 searchModeVector;
     Vector3 SearchModeControl(Vector3 shiftingAmount)
     {
-        
-        float horizontal;
-        if (Input.GetKey(KeyCode.RightArrow)) horizontal = 100;
-        else if (Input.GetKey(KeyCode.LeftArrow)) horizontal = -100;
-        else horizontal = 0;
+
+        float horizontal = InputManager.instance.GetInput("RDRHorizontal");
         horizontal *= 20 / podCamera.focalLength;
 
-        float vertical;
-        if (Input.GetKey(KeyCode.UpArrow)) vertical = 100;
-        else if (Input.GetKey(KeyCode.DownArrow)) vertical = -100;
-        else vertical = 0;
+        float vertical = InputManager.instance.GetInput("RDRVertical");
         vertical *= 20 / podCamera.focalLength;
 
         if (shiftingAmount != Vector3.zero)
@@ -589,10 +559,7 @@ public class TargettingPod : MonoBehaviour
                 bool input = false;
                 if (control)
                 {
-                    if (Input.GetKey(KeyCode.UpArrow) || 
-                        Input.GetKey(KeyCode.DownArrow) || 
-                        Input.GetKey(KeyCode.RightArrow) || 
-                        Input.GetKey(KeyCode.LeftArrow)) 
+                    if (InputManager.instance.GetInput("RDRVertical") != 0 && InputManager.instance.GetInput("RDRHorizontal") != 0) 
                         input = true;
                 }
                 else
