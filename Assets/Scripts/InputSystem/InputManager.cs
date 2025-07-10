@@ -32,19 +32,21 @@ public class InputManager : MonoBehaviour
         //container = InptCfgLoader.LoadContainer("TestInput", "D:\\Unity Projects\\RealisticCombinedArmsProject\\Assets\\Inputs");
         LoadMaps("TestInput");
     }
-
-
-    bool value1 = false;
-
+    string activemaps;
     // Update is called once per frame
     void Update()
     {
+        activemaps = "";
+        foreach (var map  in maps)
+        {
+            if (map.Value.isActive)
+            {
+                activemaps += "\n" + map.Key;
+                
+            }
+        }
+        TextFieldManager.Instance.CreateOrUpdateScreenField("activemaps").Value("Active Maps: " + activemaps);
         UpdateInputs();
-
-        if (GetInput("MoveUp") == 1 ? true : false) value1 = !value1;
-        TextFieldManager.Instance.CreateOrUpdateScreenField("W").Value("W value: " + value1).End();
-
-        if (UnityEngine.Input.GetKeyDown(KeyCode.N)) SaveMaps("TestInput");
     }
 
     public float GetInput(string actionName)
@@ -69,7 +71,7 @@ public class InputManager : MonoBehaviour
             if (maps[blackListed].isActive) return 0;
         }
 
-        Debug.Log("requested input for: " + actionName + "value is: " + actions[actionName].trigger.GetValue());
+        //Debug.Log("requested input for: " + actionName + "value is: " + actions[actionName].trigger.GetValue());
         
         return actions[actionName].trigger.GetValue();
     }
@@ -89,7 +91,7 @@ public class InputManager : MonoBehaviour
                 else 
                 { 
                     action.trigger.UpdateTrigger();
-                    Debug.Log("Updated action: " + action.name);
+                    //Debug.Log("Updated action: " + action.name);
                 }
             }
         }

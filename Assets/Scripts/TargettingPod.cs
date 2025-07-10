@@ -54,7 +54,7 @@ public class TargettingPod : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Keypad2)) ControlByState("Control");
 
-        if (Input.GetKeyDown(KeyCode.Keypad3)) ControlByState("SearchMode");
+        if (InputManager.instance.GetInput("TMSDown").ToBool()) ControlByState("SearchMode");
 
         if (Input.GetKeyDown(KeyCode.Keypad4)) ControlByState("AddPos");
 
@@ -184,12 +184,12 @@ public class TargettingPod : MonoBehaviour
     }
 
     bool shifted;
-    Vector3 shiftingVector;
     void OriginShifted(Vector3 shiftingAmount)
     {
         shifted = true;
-        shiftingVector = shiftingAmount;
         tempSearchPoint -= shiftingAmount;
+        
+
         for (int i = 0; i < trackingPositions.Count; i++)
         {
             trackingPositions[i] -= shiftingAmount;
@@ -215,7 +215,6 @@ public class TargettingPod : MonoBehaviour
     {
         float distance = Vector3.Distance(target, elevationHead.position);
         float distanceFactor = Math.Clamp( 1000 / distance, 0.01f, 1f);
-
 
         //calculate P
         float P = error * proportionalGain * distanceFactor;
@@ -251,7 +250,7 @@ public class TargettingPod : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.KeypadMinus)) currentZoom--;
 
 
-        currentZoom += InputManager.instance.GetInput("MANRNG") * 5;
+        currentZoom += InputManager.instance.GetInput("MANRNG") != 0 ? Mathf.Sign(InputManager.instance.GetInput("MANRNG")) * 5 : 0;
         currentZoom = Math.Clamp(currentZoom, 1, 100);
 
         podCamera.focalLength = 60 * currentZoom;
@@ -265,10 +264,6 @@ public class TargettingPod : MonoBehaviour
 
         float vertical = InputManager.instance.GetInput("RDRVertical");
         vertical *= 20 / podCamera.focalLength;
-
-
-
-
 
         if (manualControlVector == Vector3.zero)
         {
@@ -294,41 +289,33 @@ public class TargettingPod : MonoBehaviour
         return manualControlVector + elevationHead.position;
     }
 
-    Vector3 searchModeVector;
-    Vector3 SearchModeControl(Vector3 shiftingAmount)
+    Vector3 SearchModeControl()
     {
-
-        float horizontal = InputManager.instance.GetInput("RDRHorizontal");
-        horizontal *= 20 / podCamera.focalLength;
-
-        float vertical = InputManager.instance.GetInput("RDRVertical");
-        vertical *= 20 / podCamera.focalLength;
-
-        if (shiftingAmount != Vector3.zero)
+        if (shifted)
         {
-            searchModeVector += shiftingAmount;
-            shiftingVector = Vector3.zero;
             shifted = false;
+            return tempSearchPoint; // Bu frame'de sadece shifting uygulanýr
         }
-        var plane = searchModeVector - elevationHead.position;
+        print("A");
+        // Input handling
+        float distance = Vector3.Distance(tempSearchPoint, podCamera.transform.position);
+        float horizontal = InputManager.instance.GetInput("RDRHorizontal") * distance / podCamera.focalLength;
+        float vertical = InputManager.instance.GetInput("RDRVertical") * distance / podCamera.focalLength;
+
         Vector3 movement = podCamera.transform.up * vertical + podCamera.transform.right * horizontal;
 
-        searchModeVector += Vector3.ProjectOnPlane(movement, plane.normalized);
-        return searchModeVector;
-
+        tempSearchPoint += movement;
+        return tempSearchPoint;
     }
 
     float azimuthError;
     float elevationError;
     void AimWithPID(Vector3 target)
     {
-
-
         // Azimuth'u döndür
         azimuthError = CalculateAzimuthAngle(target);
         float azimuthTargetSpeed = Math.Clamp(PID(azimuthError, PIDCalculationType.azimuth), -10, 10);
         azimuth.speed = azimuthTargetSpeed;
-        
 
         // Elevation'ý döndür
         elevationError = CalculateElevationAngle(target);
@@ -419,6 +406,7 @@ public class TargettingPod : MonoBehaviour
         PointTrack
     }
 
+    bool SearchModeInputFlag;
     TGPState state = TGPState.Manual;
     void ControlByState(string argument = "")
     {
@@ -546,6 +534,7 @@ public class TargettingPod : MonoBehaviour
                 break;
             case TGPState.Manual:
                 if (manualControlVector == Vector3.zero) manualControlVector = podCamera.transform.forward;
+                if (tempSearchPoint != Vector3.zero) tempSearchPoint = Vector3.zero;
 
                 if (control)
                 {
@@ -556,64 +545,20 @@ public class TargettingPod : MonoBehaviour
                 break;
             case TGPState.Search:
 
-                bool input = false;
-                if (control)
+                SetTempSearchPoint();
+
+                //There's input.
+                if (InputManager.instance.GetInput("RDRVertical") != 0 || InputManager.instance.GetInput("RDRHorizontal") != 0)
                 {
-                    if (InputManager.instance.GetInput("RDRVertical") != 0 && InputManager.instance.GetInput("RDRHorizontal") != 0) 
-                        input = true;
+                    AimWithPID(SearchModeControl());
+                    LOSLastChecked = Time.time;
                 }
+                //There's no input.
                 else
                 {
-
-                    input = false;
-                }
-                //There's no input
-                if (!input)
-                {
-
-                    if (tempSearchPoint == Vector3.zero)
-                    {
-                        if (!Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 60000, mask))
-                        {
-                            state = TGPState.Manual;
-                            //Debug.DrawRay(podCamera.transform.position, podCamera.transform.forward * 1000, Color.red, 100);
-                            print("NO TEMPORARY SEARCH POUNT HAS BEEN FOUND! State has been set to Manual");
-                            manualControlVector = podCamera.transform.forward;
-                            return;
-                        }
-                        tempSearchPoint = hitPoint.point;
-                        //Debug.DrawRay(podCamera.transform.position, podCamera.transform.forward, Color.cyan, 10);
-                    }
-                    if (manualControlVector != Vector3.zero)
-                    {
-                        manualControlVector = Vector3.zero;
-                    }
+                    LineOfSightControl();
                     AimWithPID(tempSearchPoint);
-
-                    var plane = cube.transform.position - elevationHead.position;
-                    Vector3 movement = podCamera.transform.up * 1 + podCamera.transform.right * 1;
-                    searchModeVector = Vector3.ProjectOnPlane(movement, plane);
-
-                    //Debug.DrawLine(tempSearchPoint, tempSearchPoint + plane, Color.blue, 0.1f);
-                    //Debug.DrawLine(tempSearchPoint, tempSearchPoint + podCamera.transform.up, Color.green, 0.1f);
-                    //Debug.DrawLine(tempSearchPoint, tempSearchPoint + podCamera.transform.right, Color.red, 0.1f);
-                    //Debug.DrawLine(tempSearchPoint, tempSearchPoint + searchModeVector, Color.magenta, 0.1f);
                 }
-                //There's an input
-                else
-                {
-                    
-                    if (tempSearchPoint != Vector3.zero)
-                    {
-                        searchModeVector = tempSearchPoint;
-                        tempSearchPoint = Vector3.zero;
-                    }
-                    if (!shifted)
-                     AimWithPID(SearchModeControl(Vector3.zero));
-                    else AimWithPID(SearchModeControl(shiftingVector));
-                }
-
-
                 break;
             case TGPState.PointTrack:
                 AimWithPID(trackingPositions[currentTrackingPosition]);
@@ -623,7 +568,43 @@ public class TargettingPod : MonoBehaviour
 
     }
 
+    private void SetTempSearchPoint()
+    {
+        if (tempSearchPoint == Vector3.zero || SearchModeInputFlag)
+        {
+            if (!Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 60000, mask))
+            {
+                state = TGPState.Manual;
+                print("NO TEMPORARY SEARCH POUNT HAS BEEN FOUND! State has been set to Manual");
+                return;
+            }
+            tempSearchPoint = hitPoint.point;
+            manualControlVector = Vector3.zero;
+        }
+    }
+    float LOSLastChecked = 0;
+    [SerializeField] float LOSCheckInterval;
+    void LineOfSightControl()
+    {
+        if (Time.time - LOSLastChecked > LOSCheckInterval)
+        {
+            if (!Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 60000, mask))
+            {
+                state = TGPState.Manual;
+                print("NO TEMPORARY SEARCH POUNT HAS BEEN FOUND! State has been set to Manual");
+                return;
+            }
+            float jitterThreshold = 20f; // 10 cm gibi bir eþik koyabilirsin
 
+            if (Vector3.Distance(tempSearchPoint, hitPoint.point) > jitterThreshold)
+            {
+                tempSearchPoint = hitPoint.point;
+            }
+            manualControlVector = Vector3.zero;
+            print("Line of Sight checked!");
+            LOSLastChecked = Time.time;
+        }
+    }
 }
 
 

@@ -19,7 +19,7 @@
         "essential": false,
         "trigger": {
           "$type": "HoldToActivateMapTrigger, Assembly-CSharp",
-          "keyCode": "Mouse4",
+          "keyCode": "Mouse3",
           "targetMapName": "TMS",
           "mapName": "Global",
           "requiresUpdate": true

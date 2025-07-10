@@ -15,7 +15,7 @@
     "$values": [
       {
         "$type": "InputAction, Assembly-CSharp",
-        "name": "MoveUp",
+        "name": "TMSUp",
         "essential": false,
         "trigger": {
           "$type": "KeyDownTrigger, Assembly-CSharp",
@@ -26,11 +26,33 @@
       },
       {
         "$type": "InputAction, Assembly-CSharp",
-        "name": "MoveDown",
+        "name": "TMSDown",
         "essential": false,
         "trigger": {
           "$type": "KeyDownTrigger, Assembly-CSharp",
           "keyCode": "S",
+          "mapName": "TMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "TMSLeft",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "A",
+          "mapName": "TMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "TMSRight",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "D",
           "mapName": "TMS",
           "requiresUpdate": false
         }

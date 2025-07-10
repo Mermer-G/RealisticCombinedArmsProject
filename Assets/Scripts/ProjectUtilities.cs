@@ -301,6 +301,14 @@ public static class ProjectUtilities
 
 }
 
+public static class InputExtensions
+{
+    public static bool ToBool(this float value, float threshold = 1f)
+    {
+        return Mathf.Approximately(value, threshold);
+    }
+}
+
 public static class AnimationCurveExtensions
 {
     /// <summary>
