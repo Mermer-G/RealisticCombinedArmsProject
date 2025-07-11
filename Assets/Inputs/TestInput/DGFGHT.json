@@ -1,0 +1,95 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "DGFGHT",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["RDR-MAN RNG"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFPitchPlus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "W",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFPitchMinus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "S",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFRollPlus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "D",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFRollMinus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "A",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFYawPlus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "E",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFYawMinus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "Q",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFReset",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "Space",
+          "mapName": "DGFGHT",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

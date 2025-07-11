@@ -1,0 +1,95 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "FS",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["RDR-MAN RNG","DGFGHT"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSPitch",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse Y",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSRoll",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse X",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSYawPlus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "E",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSYawMinus",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "Q",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSReset",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "Space",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSLeftBrake",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "A",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "FSRightBrake",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "D",
+          "mapName": "FS",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

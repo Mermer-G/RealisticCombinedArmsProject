@@ -250,8 +250,13 @@ public class TargettingPod : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.KeypadMinus)) currentZoom--;
 
 
-        currentZoom += InputManager.instance.GetInput("MANRNG") != 0 ? Mathf.Sign(InputManager.instance.GetInput("MANRNG")) * 5 : 0;
-        currentZoom = Math.Clamp(currentZoom, 1, 100);
+        float zoomInput = InputManager.instance.GetInput("MANRNG");
+
+        if (zoomInput > 0)
+            currentZoom *= 1.2f;
+        else if (zoomInput < 0)
+            currentZoom /= 1.2f;
+        currentZoom = Math.Clamp(currentZoom, 1, 256);
 
         podCamera.focalLength = 60 * currentZoom;
     }
@@ -588,20 +593,15 @@ public class TargettingPod : MonoBehaviour
     {
         if (Time.time - LOSLastChecked > LOSCheckInterval)
         {
-            if (!Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 60000, mask))
-            {
-                state = TGPState.Manual;
-                print("NO TEMPORARY SEARCH POUNT HAS BEEN FOUND! State has been set to Manual");
-                return;
-            }
-            float jitterThreshold = 20f; // 10 cm gibi bir eþik koyabilirsin
-
-            if (Vector3.Distance(tempSearchPoint, hitPoint.point) > jitterThreshold)
+            Vector3 direction = (tempSearchPoint - podCamera.transform.position).normalized;
+            //There's an obstacle
+            if (Physics.Raycast(podCamera.transform.position, direction, out RaycastHit hitPoint, 60000, mask))
             {
                 tempSearchPoint = hitPoint.point;
+                LOSLastChecked = Time.time;
+                return;
             }
-            manualControlVector = Vector3.zero;
-            print("Line of Sight checked!");
+            //float jitterThreshold = 20f; // 10 cm gibi bir eþik koyabilirsin
             LOSLastChecked = Time.time;
         }
     }

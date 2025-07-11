@@ -1,0 +1,40 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "THRST",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["RDR-MAN RNG"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "THRSTChange",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse ScrollWheel",
+          "mapName": "THRST",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "THRSTDetent",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "LeftControl",
+          "mapName": "THRST",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

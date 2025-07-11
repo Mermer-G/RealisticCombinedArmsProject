@@ -144,7 +144,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     public PilotInput F16Input;
 
     Vector3 angularVelocity;
-    bool control = false;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -161,10 +161,6 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Mouse1)) control = true;
-        else control = false;
-
-
         if (Input.GetKeyDown(KeyCode.G)) LimitG = !LimitG;
 
         if (Input.GetKeyDown(KeyCode.O)) keepAltByAltChange = !keepAltByAltChange;
@@ -245,67 +241,69 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         ClickableEventHandler.Unsubscribe("DisableFCS", DisableFCS);
     }
 
-    bool power;
-
+    
+    bool thrustDetent;
     void GetPilotInput()
     {
-        if (!control) return;
+        F16Input.x += InputManager.instance.GetInput("FSPitch") / inputSize;
+        F16Input.z += InputManager.instance.GetInput("FSRoll") / inputSize;
+        F16Input.y += (InputManager.instance.GetInput("FSYawPlus") - InputManager.instance.GetInput("FSYawMinus")) / inputSize;
 
-        var a = inputSensitivity * Time.time;
+        // Pitch
+        float pitchPlus = InputManager.instance.GetInput("DFPitchPlus");
+        float pitchMinus = InputManager.instance.GetInput("DFPitchMinus");
+        if (pitchPlus == 1f && pitchMinus == 1f)
+            F16Input.x = 0;
+        else
+            F16Input.x += (pitchPlus - pitchMinus) / (inputSize * 5);
 
-        F16Input.x += Input.GetAxis("Mouse Y") / inputSize; //* a;
-        F16Input.z += Input.GetAxis("Mouse X") / inputSize; //* a;
-        F16Input.y += (Input.GetAxis("Yaw") / inputSize); //* a;
+        // Roll
+        float rollPlus = InputManager.instance.GetInput("DFRollPlus");
+        float rollMinus = InputManager.instance.GetInput("DFRollMinus");
+        if (rollPlus == 1f && rollMinus == 1f)
+            F16Input.z = 0;
+        else
+            F16Input.z += (rollPlus - rollMinus) / (inputSize * 5);
+
+        // Yaw
+        float yawPlus = InputManager.instance.GetInput("DFYawPlus");
+        float yawMinus = InputManager.instance.GetInput("DFYawMinus");
+        if (yawPlus == 1f && yawMinus == 1f)
+            F16Input.y = 0;
+        else
+            F16Input.y += (yawPlus - yawMinus) / (inputSize * 5);
 
         //Yaw decaying rate
         if (yawDecayingRate != 0) F16Input.y = Mathf.Lerp(F16Input.y, 0, yawDecayingRate);
 
+        //LEF Calculation
         F16Input.s = ProjectUtilities.MapWithSign(AerodynamicModel.alpha, 0, 15, -0.08f, 1);
         F16Input.s = Mathf.Clamp(F16Input.s, -0.08f, 1);
         if (rb.linearVelocity.magnitude < 30) F16Input.s = 0;
 
-        var upSnap = Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.W);
-        var downSnap = Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.S);
+        //below 0.1 you need to engage detent to move it.
+        //After 0.1 you can move it from 0.1 to 1 freely without engaging detent.
+        //To get above it you need to activate detent again.
 
-        var powerUpSnap = Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.W);
-        var powerDownSnap = Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.S);
+        if (InputManager.instance.GetInput("THRSTDetent").ToBool()) thrustDetent = !thrustDetent;
+        float newThrottle = InputManager.instance.GetInput("THRSTChange");
 
-        //Up Snaps
-        if (F16Input.t < 0.1f && powerUpSnap)
-        {
-            F16Input.t = 0.1f;
-            power = true;
-        }
-        else if (F16Input.t >= 0.1f && F16Input.t < 1 && upSnap)
-        {
-            F16Input.t = 1f;
-        }
-        else if (F16Input.t >= 1f && upSnap)
-        {
-            F16Input.t = 1.25f;
-        }
-        //Down Snaps
-        if (F16Input.t > 1 && downSnap)
-        {
-            F16Input.t = 1;
-        }
-        else if (F16Input.t <= 1 && F16Input.t > 0.1f && downSnap)
-        {
-            F16Input.t = 0.1f;
-        }
-        else if (F16Input.t == 0.1f && powerDownSnap)
-        {
-            F16Input.t = 0;
-            power = false;
-        }
+        // Throttle arttırılır veya azaltılır
+        if (F16Input.t < 0.1f && newThrottle > 0 && !thrustDetent) newThrottle = 0; 
+        F16Input.t += newThrottle;
 
-        //Thrust can only be varied after 0.1f
-        if (F16Input.t >= 0.1f && !Input.GetKey(KeyCode.LeftShift)) F16Input.t += Input.GetAxis("Vertical") / inputSize * inputSensitivity;
-        if (power) F16Input.t = Mathf.Clamp(F16Input.t, 0.1f, 1.25f);
-        var outputThrust = F16Input.t;
+        // Detent'e göre clamp aralığını belirle
+        float minThrottle = thrustDetent ? 0f : 0.1f;
+        float maxThrottle = thrustDetent ? 1.25f : 1f;
 
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        // Clamp uygula
+        if (F16Input.t >= 0.1)
+            F16Input.t = Mathf.Clamp(F16Input.t, minThrottle, maxThrottle);
+        else
+            F16Input.t = Mathf.Clamp(F16Input.t, 0, maxThrottle);
+
+        if (InputManager.instance.GetInput("FSReset").ToBool() || InputManager.instance.GetInput("DFReset").ToBool())
         {
             iStoredP = 0;
             iStoredY = 0;

@@ -8,7 +8,7 @@
   },
   "BlacklistedMaps": {
     "$type": "System.String[], mscorlib",
-    "$values": ["RDR-MAN RNG"]
+    "$values": ["RDR-MAN RNG","THRST"]
   },
   "inputActions": {
     "$type": "InputAction[], Assembly-CSharp",

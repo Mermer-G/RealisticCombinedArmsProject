@@ -58,7 +58,7 @@ public class CameraController : MonoBehaviour
     {
 
         TextFieldManager.Instance.CreateOrUpdateScreenField("SecComFlag").Value(secondaryCommandFlag.ToString()).End();
-        if (Input.GetKey(KeyCode.C) && !secondaryCommandFlag)
+        if (Input.GetKey(KeyCode.V) && !secondaryCommandFlag)
         {
             //Command for switching to free camera
             if (Input.GetKey(KeyCode.Alpha1))
@@ -87,7 +87,7 @@ public class CameraController : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyUp(KeyCode.C))
+        if (Input.GetKeyUp(KeyCode.V))
         {
             if (secondaryCommandFlag)
             {

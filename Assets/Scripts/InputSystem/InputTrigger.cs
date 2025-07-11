@@ -101,6 +101,35 @@ public class HoldToActivateMapTrigger : InputTrigger
     }
 }
 
+public class ToggleMapWithActionTrigger : InputTrigger
+{
+    public string actionName;       // Dinlenecek input action
+    public string targetMapName;    // Etkilenecek harita
+    private bool toggle;
+
+    public override float GetValue()
+    {
+        return 0; // Bu trigger direkt input olarak kullanýlmaz
+    }
+
+    public override void UpdateTrigger()
+    {
+        if (InputManager.instance.GetInput(actionName).ToBool())
+        {
+            toggle = !toggle;
+
+            if (InputManager.instance.maps.TryGetValue(targetMapName, out var map))
+            {
+                map.isActive = toggle;
+            }
+            else
+            {
+                Debug.LogWarning($"[ToggleMapWithActionTrigger] Map not found: {targetMapName}");
+            }
+        }
+    }
+}
+
 //Bunun içinde tuttuðu trigger'lar hepsi true ise ya da float döndürüyorsa döndüreceði float 0'dan farklýysa input manager yardýmýyla döndürülebilir olmalý.
 public class InputAction
 {

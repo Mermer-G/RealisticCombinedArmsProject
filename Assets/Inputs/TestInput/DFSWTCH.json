@@ -1,0 +1,51 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "DFSWTCH",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["TMS"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFSWTCHUp",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "W",
+          "mapName": "DFSWTCH",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFSWTCHLeft",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "A",
+          "mapName": "DFSWTCH",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DFSWTCHRight",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "D",
+          "mapName": "DFSWTCH",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

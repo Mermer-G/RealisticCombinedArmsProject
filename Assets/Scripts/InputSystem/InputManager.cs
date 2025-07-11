@@ -60,7 +60,7 @@ public class InputManager : MonoBehaviour
         var mapName = actions[actionName].trigger.mapName;
         if (!maps.TryGetValue(mapName, out var map) || map == null)
         {
-            Debug.LogError($"Map not found: {mapName}");
+            Debug.LogError($"Map not found: {mapName} for action: {actionName}");
             return 0;
         }
 

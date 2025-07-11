@@ -307,6 +307,11 @@ public static class InputExtensions
     {
         return Mathf.Approximately(value, threshold);
     }
+
+    public static float ToFloat(this bool value, float trueValue = 1f, float falseValue = 1f)
+    {
+        return value ? trueValue : falseValue;
+    }
 }
 
 public static class AnimationCurveExtensions

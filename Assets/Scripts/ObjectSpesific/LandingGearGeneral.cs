@@ -198,8 +198,8 @@ public class LandingGearGeneral : MonoBehaviour, IHydraulicConsumer, IEnergyCons
 
     void Brakes()
     {
-        bool rightBrakeInput = Input.GetKey(KeyCode.X);
-        bool leftBrakeInput = Input.GetKey(KeyCode.Z);
+        bool rightBrakeInput = InputManager.instance.GetInput("FSRightBrake").ToBool();
+        bool leftBrakeInput = InputManager.instance.GetInput("FSLeftBrake").ToBool();
         noseGear.motorTorque = 1;
         switch (brakingType)
         {
