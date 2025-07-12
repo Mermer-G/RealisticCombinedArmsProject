@@ -308,7 +308,7 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
         else
             F16Input.t = Mathf.Clamp(F16Input.t, 0, maxThrottle);
 
-        if (InputManager.instance.GetInput("FSReset").ToBool() || InputManager.instance.GetInput("DFReset").ToBool())
+        if (InputManager.instance.GetInput("FSReset").ToBool() || InputManager.instance.GetInput("DFReset").ToBool() || InputManager.instance.GetInput("NWSReset").ToBool())
         {
             iStoredP = 0;
             iStoredY = 0;
