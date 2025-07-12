@@ -1,0 +1,62 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "NWS",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["FS"]
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["RDR-MAN RNG"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "NWSYaw",
+        "essential": false,
+        "trigger": {
+          "$type": "AxisTrigger, Assembly-CSharp",
+          "axis": "Mouse X",
+          "mapName": "NWS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "NWSLeftBrake",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "A",
+          "mapName": "NWS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "NWSRightBrake",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyHoldTrigger, Assembly-CSharp",
+          "keyCode": "D",
+          "mapName": "NWS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "NWSReset",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "Space",
+          "mapName": "NWS",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}

@@ -29,6 +29,7 @@ public class QuickStarter : MonoBehaviour
             GenericEventManager.Invoke("JFSStartSet", 2);
             FLCS.F16Input.t = 0.1f;
             GenericEventManager.Invoke("MainPowerSet", 0);
+            GenericEventManager.Invoke("ParkingBrakeSet", 0);
             GenericEventManager.Invoke("CanopySet", 2);
             GenericEventManager.Invoke<float>("1-HMCSAlphaSet", 1);
             GenericEventManager.Invoke<float>("1-HUDAlphaSet", 1);

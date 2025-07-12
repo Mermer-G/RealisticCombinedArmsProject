@@ -168,7 +168,7 @@ public class LandingGearGeneral : MonoBehaviour, IHydraulicConsumer, IEnergyCons
 
     void NoseWheelSteering()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse3)) NWS = !NWS;
+        NWS = InputManager.instance.maps["NWS"].isActive;
         //Nose Gear Steering
         if (NWS && currentSystemPressure > minPressureH && gearsDeployed)
         {
@@ -198,8 +198,8 @@ public class LandingGearGeneral : MonoBehaviour, IHydraulicConsumer, IEnergyCons
 
     void Brakes()
     {
-        bool rightBrakeInput = InputManager.instance.GetInput("FSRightBrake").ToBool();
-        bool leftBrakeInput = InputManager.instance.GetInput("FSLeftBrake").ToBool();
+        bool rightBrakeInput = InputManager.instance.GetInput("FSRightBrake").ToBool() || InputManager.instance.GetInput("NWSRightBrake").ToBool();
+        bool leftBrakeInput = InputManager.instance.GetInput("FSLeftBrake").ToBool() || InputManager.instance.GetInput("NWSLeftBrake").ToBool();
         noseGear.motorTorque = 1;
         switch (brakingType)
         {

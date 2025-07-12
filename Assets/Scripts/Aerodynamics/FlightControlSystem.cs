@@ -245,10 +245,15 @@ public class FlightControlSystem : MonoBehaviour, IEnergyConsumer
     bool thrustDetent;
     void GetPilotInput()
     {
+        //FS map
         F16Input.x += InputManager.instance.GetInput("FSPitch") / inputSize;
         F16Input.z += InputManager.instance.GetInput("FSRoll") / inputSize;
         F16Input.y += (InputManager.instance.GetInput("FSYawPlus") - InputManager.instance.GetInput("FSYawMinus")) / inputSize;
 
+        //NWS map
+        F16Input.y += InputManager.instance.GetInput("NWSYaw") / inputSize;
+
+        //DGFGHT map
         // Pitch
         float pitchPlus = InputManager.instance.GetInput("DFPitchPlus");
         float pitchMinus = InputManager.instance.GetInput("DFPitchMinus");

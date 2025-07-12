@@ -71,8 +71,13 @@ public class InputManager : MonoBehaviour
             if (maps[blackListed].isActive) return 0;
         }
 
+        foreach (var required in maps[actions[actionName].trigger.mapName].RequiredMaps)
+        {
+            if (!maps[required].isActive) return 0;
+        }
+
         //Debug.Log("requested input for: " + actionName + "value is: " + actions[actionName].trigger.GetValue());
-        
+
         return actions[actionName].trigger.GetValue();
     }
 

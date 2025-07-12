@@ -173,13 +173,9 @@ public class CameraController : MonoBehaviour
             }
         }
 
-        //Control
-        if (Input.GetKey(KeyCode.Mouse1)) control = false;
-        else control = true;
+        
 
-        //Input
-        if (control) cameraInput = new Vector2(InputManager.instance.GetInput("CameraHorizontal"), InputManager.instance.GetInput("CameraVertical"));
-        else cameraInput = Vector2.zero;
+        cameraInput = new Vector2(InputManager.instance.GetInput("CameraHorizontal"), InputManager.instance.GetInput("CameraVertical"));
 
         //Zoom
         customCameras[activeCameraIndex].thisCamera.fieldOfView -= InputManager.instance.GetInput("CameraZoom") * zoomSensivity;

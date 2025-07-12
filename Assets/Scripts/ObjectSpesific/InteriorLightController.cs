@@ -8,6 +8,7 @@ public class InteriorLightController : MonoBehaviour
 
     [SerializeField] float panelBrightness;
     [SerializeField] float consoleBrightness;
+    [SerializeField] float brightnessMultiplier;
 
     #region MaterialGroups
     [System.Serializable]
@@ -91,7 +92,7 @@ public class InteriorLightController : MonoBehaviour
 
     void SetPanelBrightness()
     {
-        var b = panelBrightness;
+        var b = panelBrightness * brightnessMultiplier;
         if (!consumer.IsPoweredE) b = 0;
 
         var panelElements = GetGroupRenderers("PanelElements");
@@ -104,21 +105,21 @@ public class InteriorLightController : MonoBehaviour
             {
                 if (renderer.materials[i].name.Contains("InstrumentEmission")) // veya doðrudan == targetMaterial
                 {
-                    renderer.materials[i].SetFloat("_EmissionStrength", b);
+                    renderer.materials[i].SetFloat("_EmissionS", b);
                 }
             }
         }
-        FTIT[0].material.SetFloat("_EmissionStrength", b);
-        FTIT[1].material.SetFloat("_EmissionStrength", b);
-        RPM[0].material.SetFloat("_EmissionStrength", b);
-        RPM[1].material.SetFloat("_EmissionStrength", b);
-        NOZPOS[0].material.SetFloat("_EmissionStrength", b);
-        NOZPOS[1].material.SetFloat("_EmissionStrength", b);
+        FTIT[0].material.SetFloat("_EmissionS", b);
+        FTIT[1].material.SetFloat("_EmissionS", b);
+        RPM[0].material.SetFloat("_EmissionS", b);
+        RPM[1].material.SetFloat("_EmissionS", b);
+        NOZPOS[0].material.SetFloat("_EmissionS", b);
+        NOZPOS[1].material.SetFloat("_EmissionS", b);
     }
 
     void SetConsoleBrightness()
     {
-        var b = consoleBrightness;
+        var b = consoleBrightness * brightnessMultiplier;
         if (!consumer.IsPoweredE) b = 0;
 
         var consoleElements = GetGroupRenderers("ConsoleElements");
@@ -129,13 +130,13 @@ public class InteriorLightController : MonoBehaviour
             {
                 if (renderer.materials[i].name.Contains("ConsoleEmission")) // veya doðrudan == targetMaterial
                 {
-                    renderer.materials[i].SetFloat("_EmissionStrength", b);
+                    renderer.materials[i].SetFloat("_EmissionS", b);
                 }
             }
         }
         foreach (var renderer in consoleTexts)
         {
-            renderer.material.SetFloat("_EmissionStrength", b);
+            renderer.material.SetFloat("_EmissionS", b);
         }
     }
 

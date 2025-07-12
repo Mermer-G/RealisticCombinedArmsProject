@@ -75,6 +75,18 @@
       },
       {
         "$type": "InputAction, Assembly-CSharp",
+        "name": "ToggleNWS",
+        "essential": false,
+        "trigger": {
+          "$type": "ToggleToActivateMapTrigger, Assembly-CSharp",
+          "keyCode": "N",
+          "targetMapName": "NWS",
+          "mapName": "Global",
+          "requiresUpdate": true
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
         "name": "ToggleDF",
         "essential": false,
         "trigger": {

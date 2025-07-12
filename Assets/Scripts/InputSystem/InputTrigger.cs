@@ -101,6 +101,32 @@ public class HoldToActivateMapTrigger : InputTrigger
     }
 }
 
+public class ToggleToActivateMapTrigger : InputTrigger
+{
+    public KeyCode keyCode;
+    public string targetMapName; // Etkileyeceði map
+    bool toggle;
+    public override float GetValue()
+    {
+        // Bu trigger kendi map'inde input olarak kullanýlmaz, bu yüzden 0 döner.
+        return 0;
+    }
+
+    public override void UpdateTrigger()
+    {
+        if(Input.GetKeyDown(keyCode)) toggle = !toggle;
+
+        if (InputManager.instance.maps.TryGetValue(targetMapName, out var map))
+        {
+            map.isActive = toggle;
+        }
+        else
+        {
+            Debug.LogWarning($"[HoldToActivateMapTrigger] Map not found: {targetMapName}");
+        }
+    }
+}
+
 public class ToggleMapWithActionTrigger : InputTrigger
 {
     public string actionName;       // Dinlenecek input action
