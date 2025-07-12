@@ -243,22 +243,50 @@ public class TargettingPod : MonoBehaviour
     }
 
 
-    float currentZoom = 0;
+    float[] wideZooms = new float[9]
+{
+    1.000f,
+    1.222f,
+    1.494f,
+    1.826f,
+    2.232f,
+    2.728f,
+    3.333f,
+    4.073f,
+    5.000f
+};
+
+    float[] narrowZooms = new float[9]
+    {
+    5.000f,
+    6.111f,
+    7.471f,
+    9.131f,
+    11.160f,
+    13.640f,
+    16.665f,
+    20.365f,
+    25.000f
+    };
+    bool narrowZoom;
+    int currentZoom = 0;
     void Zoom()
     {
-        if (Input.GetKeyDown(KeyCode.KeypadPlus)) currentZoom++;
-        if (Input.GetKeyDown(KeyCode.KeypadMinus)) currentZoom--;
-
+        if (InputManager.instance.GetInput("TMSRight").ToBool())
+            narrowZoom = !narrowZoom;
 
         float zoomInput = InputManager.instance.GetInput("MANRNG");
 
         if (zoomInput > 0)
-            currentZoom *= 1.2f;
+            currentZoom += 1;
         else if (zoomInput < 0)
-            currentZoom /= 1.2f;
-        currentZoom = Math.Clamp(currentZoom, 1, 256);
+            currentZoom -= 1;
+        currentZoom = Math.Clamp(currentZoom, 0, 8);
 
-        podCamera.focalLength = 60 * currentZoom;
+        if (narrowZoom)
+            podCamera.focalLength = 60 * narrowZooms[currentZoom];
+        else
+            podCamera.focalLength = 60 * wideZooms[currentZoom];
     }
     Vector3 horizontalAxis;
     Vector3 verticalAxis;

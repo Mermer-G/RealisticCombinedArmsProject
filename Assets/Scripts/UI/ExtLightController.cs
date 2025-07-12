@@ -178,7 +178,7 @@ public class ExtLightController : MonoBehaviour
         consumer.ChangePowerStatusE(true);
         foreach (var light in formationLights)
         {
-            light.intensity = brightLevel * brightness;
+            light.intensity = brightLevel * brightness * 10;
             if (brightness == 0) light.enabled = false;
             else light.enabled = true;
         }
