@@ -1,13 +1,11 @@
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
+using static Unity.Burst.Intrinsics.X86.Avx;
+using static UnityEngine.UI.Image;
 
-public class TargettingPod : MonoBehaviour
+public class TargettingPod : MonoBehaviour, ISensorOfInterest
 {
     EnergyConsumerComponent consumer;
     [SerializeField] Camera podCamera;
@@ -30,18 +28,21 @@ public class TargettingPod : MonoBehaviour
     [SerializeField] int renderingFPS;
 
     [SerializeField] bool gravityAlign;
-    [SerializeField] bool control;
     Vector3 manualControlVector = Vector3.zero;
 
     Vector3 tempSearchPoint = Vector3.zero;
 
-    List<Vector3> trackingPositions = new();
-    int currentTrackingPosition;
+    [Header("Format values")]
+    public bool enableRendering;
+    public bool narrowZoom;
+    
+    bool SOI = true;
+
+
 
     // Start is called before the first frame update
     void Start()
     {
-        targetPrevPosition = target;
         consumer = GetComponent<EnergyConsumerComponent>();
         azimuthHead = azimuth.transform.GetChild(0);
         elevationHead = elevation.transform.GetChild(0);
@@ -55,16 +56,6 @@ public class TargettingPod : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Keypad2)) ControlByState("Control");
 
         if (InputManager.instance.GetInput("TMSDown").ToBool()) ControlByState("SearchMode");
-
-        if (Input.GetKeyDown(KeyCode.Keypad4)) ControlByState("AddPos");
-
-        if (Input.GetKeyDown(KeyCode.Keypad5)) ControlByState("DelPos");
-
-        if (Input.GetKeyDown(KeyCode.Keypad6)) ControlByState("NextPos");
-
-        //if (Input.GetKeyDown(KeyCode.Keypad7)) ControlByState("PrevPos");
-
-        if (Input.GetKeyDown(KeyCode.Keypad9)) enableRendering = !enableRendering;
 
         if (enableRendering && !consumer.IsPoweredE)
         {
@@ -82,10 +73,6 @@ public class TargettingPod : MonoBehaviour
         {
             target = tempSearchPoint;
         }
-        if (state == TGPState.PointTrack)
-        {
-            target = trackingPositions[currentTrackingPosition];
-        }
         
         if (gravityAlign)
         {
@@ -93,13 +80,9 @@ public class TargettingPod : MonoBehaviour
             {
                 DoAbsoluteGravityAlign(Vector3.zero);
             }
-            if (state == TGPState.Search)
+            if (state == TGPState.AreaTrack)
             {
                 DoAbsoluteGravityAlign(tempSearchPoint);
-            }
-            if (state == TGPState.PointTrack)
-            {
-                DoAbsoluteGravityAlign(trackingPositions[currentTrackingPosition]);
             }
         }
         Render();
@@ -113,7 +96,7 @@ public class TargettingPod : MonoBehaviour
         RenderTexture.active = rt;
     }
 
-    [SerializeField] bool enableRendering;
+    
     float lastRendered = 0;
     void Render()
     {
@@ -144,11 +127,8 @@ public class TargettingPod : MonoBehaviour
                 break;
             case TGPState.Manual:
                 break;
-            case TGPState.Search:
+            case TGPState.AreaTrack:
                 cube.transform.position = tempSearchPoint;
-                break;
-            case TGPState.PointTrack:
-                cube.transform.position = trackingPositions[currentTrackingPosition];
                 break;
             default:
                 break;
@@ -158,20 +138,14 @@ public class TargettingPod : MonoBehaviour
     void DoAbsoluteGravityAlign(Vector3 pos)
     {
         if (pos == Vector3.zero)
-            podCamera.transform.rotation = Quaternion.LookRotation(elevationHead.forward, Vector3.up);
+            podCamera.transform.rotation = Quaternion.LookRotation(elevationHead.forward, elevationHead.up);
         
         else
         {
             var dir = pos - elevationHead.position;
-            podCamera.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            podCamera.transform.rotation = Quaternion.LookRotation(dir, elevationHead.up);
         }
     }
-
-
-    Vector3 targetSpeed;
-    Vector3 targetPrevPosition;
-
-
 
     private void OnEnable()
     {
@@ -188,12 +162,6 @@ public class TargettingPod : MonoBehaviour
     {
         shifted = true;
         tempSearchPoint -= shiftingAmount;
-        
-
-        for (int i = 0; i < trackingPositions.Count; i++)
-        {
-            trackingPositions[i] -= shiftingAmount;
-        }
     }
 
 
@@ -268,10 +236,12 @@ public class TargettingPod : MonoBehaviour
     20.365f,
     25.000f
     };
-    bool narrowZoom;
+    
     int currentZoom = 0;
     void Zoom()
     {
+        if (!SOI) return;
+
         if (InputManager.instance.GetInput("TMSRight").ToBool())
             narrowZoom = !narrowZoom;
 
@@ -292,6 +262,8 @@ public class TargettingPod : MonoBehaviour
     Vector3 verticalAxis;
     Vector3 AdvencedControl()
     {
+        
+
         float horizontal = InputManager.instance.GetInput("RDRHorizontal");
         horizontal *= 20 / podCamera.focalLength;
 
@@ -335,7 +307,14 @@ public class TargettingPod : MonoBehaviour
         float horizontal = InputManager.instance.GetInput("RDRHorizontal") * distance / podCamera.focalLength;
         float vertical = InputManager.instance.GetInput("RDRVertical") * distance / podCamera.focalLength;
 
-        Vector3 movement = podCamera.transform.up * vertical + podCamera.transform.right * horizontal;
+        Vector3 forward = podCamera.transform.forward;
+
+        // Gravity-referenced "horizontal" düzlemde yönler
+        Vector3 up = Vector3.ProjectOnPlane(Vector3.up, forward).normalized;
+        Vector3 right = Vector3.Cross(up, forward);
+
+        // Hareket vektörünü oluþtur
+        Vector3 movement = up * vertical + right * horizontal;
 
         tempSearchPoint += movement;
         return tempSearchPoint;
@@ -399,11 +378,6 @@ public class TargettingPod : MonoBehaviour
         // Açýyý hesapla (Yönlü açý)
         float projectedAngleError = Vector3.SignedAngle(projectedCurrentDirection, projectedTargetDirection, rotorAxis);
 
-        //// Debug çizgileri
-        //Debug.DrawLine(azimuthHead.position, azimuthHead.position + currentDirection, Color.blue, 0.2f);
-        //Debug.DrawLine(azimuthHead.position, azimuthHead.position + rotorAxis, Color.green, 0.2f);
-        //Debug.DrawLine(azimuthHead.position, azimuthHead.position + projectedTargetDirection, Color.red, 0.2f);
-
         return projectedAngleError;
     }
 
@@ -431,11 +405,35 @@ public class TargettingPod : MonoBehaviour
         return projectedAngleError;
     }
 
+    public float CalculateExportRotation()
+    {
+        var up = Vector3.up;
+        var cameraUp = podCamera.transform.up;
+        var axis = podCamera.transform.forward;
+
+        var refPoint = podCamera.transform.position + podCamera.transform.forward * 2;
+        var projectedCamUp = Vector3.ProjectOnPlane(cameraUp, axis).normalized;
+        var projectedWorldUp = Vector3.ProjectOnPlane(up, axis).normalized;
+        //Debug lines
+        var origin = podCamera.transform.position + axis * 2f;
+
+        Debug.DrawLine(origin, origin + axis * 0.5f, Color.yellow, 0.1f); // Forward (axis)
+        Debug.DrawLine(origin, origin + projectedCamUp * 0.5f, Color.blue, 0.1f); // Camera up
+        Debug.DrawLine(origin, origin + projectedWorldUp * 0.5f, Color.green, 0.1f); // World up
+
+        //var project = Vector3.Project(cameraUp, axis);
+        return -Vector3.SignedAngle(projectedCamUp, projectedWorldUp, axis);
+    }
+
     enum TGPState
     {
         Test,
         Manual,
-        Search,
+        CursorZero,
+        SteerPointTrack,
+        SnowPlow,
+        INRTrack,
+        AreaTrack,
         PointTrack
     }
 
@@ -447,9 +445,9 @@ public class TargettingPod : MonoBehaviour
         {
             if (argument == "SearchMode")
             {
-                if (state != TGPState.Search)
+                if (state != TGPState.AreaTrack)
                 {
-                    state = TGPState.Search;
+                    state = TGPState.AreaTrack;
                     manualControlVector = Vector3.zero;
                     Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 15000, mask);
                     tempSearchPoint = hitPoint.point;
@@ -460,100 +458,6 @@ public class TargettingPod : MonoBehaviour
                     state = TGPState.Manual;
                     print("State has been set to Manual");
                 }
-            }
-
-            if (argument == "AddPos")
-            {
-                Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 15000, mask);
-                trackingPositions.Add(hitPoint.point);
-                currentTrackingPosition = trackingPositions.Count - 1;
-
-                state = TGPState.PointTrack;
-
-                print("A new point added to the " + currentTrackingPosition + "th index and tracking.");
-            }
-
-            if (argument == "DelPos")
-            {
-                if (trackingPositions.Count > 1)
-                {
-                    if (currentTrackingPosition + 1 == trackingPositions.Count)
-                    {
-                        currentTrackingPosition--;
-                        trackingPositions.RemoveAt(currentTrackingPosition + 1);
-                        print("The point from the " + (currentTrackingPosition + 1) + "th index has been deleted. \n" +
-                            "Current index is: " + currentTrackingPosition);
-                    }
-                    else if (currentTrackingPosition == 0)
-                    {
-                        currentTrackingPosition++;
-                        trackingPositions.RemoveAt(currentTrackingPosition - 1);
-                        print("The point from the " + (currentTrackingPosition - 1) + "th index has been deleted. \n" +
-                            "Current index is: " + currentTrackingPosition);
-                    }
-                }
-                else if (trackingPositions.Count == 1)
-                {
-                    trackingPositions.RemoveAt(currentTrackingPosition);
-                    state = TGPState.Search;
-                    print("No tracking point has been left in the list. Switching the state to Search Mode");
-                }
-            }
-
-            if (argument == "NextPos")
-            {
-                if (state != TGPState.PointTrack)
-                {
-                    state = TGPState.PointTrack;
-                    print("State set to Point Track");
-                    return;
-                }
-
-                if (trackingPositions.Count > 1)
-                {
-                    if (currentTrackingPosition + 2 > trackingPositions.Count)
-                    {
-                        print("The zero;");
-                        currentTrackingPosition = 0;
-                    }
-                    else
-                    {
-                        print("Increased;");
-                        currentTrackingPosition++;
-                    }
-                    print("Tracking the " + currentTrackingPosition + "th point.");
-                }
-            }
-
-            if (argument == "PrevPos")
-            {
-                if (state != TGPState.PointTrack)
-                {
-                    state = TGPState.PointTrack;
-                    print("State set to Point Track");
-                    return;
-                }
-
-                if (trackingPositions.Count > 1)
-                {
-                    if (currentTrackingPosition == 0)
-                    {
-                        currentTrackingPosition = trackingPositions.Count - 1;
-                    }
-                    else
-                    {
-                        currentTrackingPosition--;
-                    }
-                    print("Tracking the " + currentTrackingPosition + "th point.");
-                }
-            }
-
-            if (argument == "Control")
-            {
-                control = !control;
-                if (control) print("Control has been enabled.");
-
-                else print("Control has been disabled.");
             }
 
             return;
@@ -569,19 +473,18 @@ public class TargettingPod : MonoBehaviour
                 if (manualControlVector == Vector3.zero) manualControlVector = podCamera.transform.forward;
                 if (tempSearchPoint != Vector3.zero) tempSearchPoint = Vector3.zero;
 
-                if (control)
+                if (SOI)
                 {
                     AimWithPID(AdvencedControl());
-                    //Debug.DrawLine(podCamera.transform.position, podCamera.transform.position + manualControlVector, Color.cyan, 0.1f);
                 }
 
                 break;
-            case TGPState.Search:
+            case TGPState.AreaTrack:
 
                 SetTempSearchPoint();
 
                 //There's input.
-                if (InputManager.instance.GetInput("RDRVertical") != 0 || InputManager.instance.GetInput("RDRHorizontal") != 0)
+                if (InputManager.instance.GetInput("RDRVertical") != 0 || InputManager.instance.GetInput("RDRHorizontal") != 0 && SOI)
                 {
                     AimWithPID(SearchModeControl());
                     LOSLastChecked = Time.time;
@@ -592,9 +495,6 @@ public class TargettingPod : MonoBehaviour
                     LineOfSightControl();
                     AimWithPID(tempSearchPoint);
                 }
-                break;
-            case TGPState.PointTrack:
-                AimWithPID(trackingPositions[currentTrackingPosition]);
                 break;
         }
 
@@ -632,6 +532,16 @@ public class TargettingPod : MonoBehaviour
             //float jitterThreshold = 20f; // 10 cm gibi bir eþik koyabilirsin
             LOSLastChecked = Time.time;
         }
+    }
+
+    public void SetSOI()
+    {
+        SOI = true;
+    }
+
+    public void UnSetSOI()
+    {
+        SOI = false;
     }
 }
 

@@ -8,7 +8,7 @@
   },
   "BlacklistedMaps": {
     "$type": "System.String[], mscorlib",
-    "$values": []
+    "$values": ["DMS"]
   },
   "inputActions": {
     "$type": "InputAction[], Assembly-CSharp",
@@ -55,18 +55,6 @@
           "keyCode": "D",
           "mapName": "TMS",
           "requiresUpdate": false
-        }
-      },
-      {
-        "$type": "InputAction, Assembly-CSharp",
-        "name": "HoldFire",
-        "essential": false,
-        "trigger": {
-          "$type": "HoldForSecondsTrigger, Assembly-CSharp",
-          "keyCode": "Space",
-          "secondsForHolding": 2.0,
-          "mapName": "TMS",
-          "requiresUpdate": true
         }
       }
     ]

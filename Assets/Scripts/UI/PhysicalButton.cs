@@ -2,21 +2,21 @@ using UnityEngine;
 
 public class PhysicalButton : MonoBehaviour, IClickable
 {
-    [SerializeField] Vector3 pressedPosition;
-    [SerializeField] Vector3 normalPosition;
-    [SerializeField] Transform objectToMove;
-    [SerializeField] float returnSpeed;
-    [SerializeField] bool animate;
+    [SerializeField] protected Vector3 pressedPosition;
+    [SerializeField] protected Vector3 normalPosition;
+    [SerializeField] protected Transform objectToMove;
+    [SerializeField] protected float returnSpeed;
+    [SerializeField] protected bool animate;
 
-    [SerializeField] string leftClickMethod;
-    [SerializeField] string rightClickMethod;
+    [SerializeField] protected string leftClickMethod;
+    [SerializeField] protected string rightClickMethod;
 
-    void SetPosition()
+    protected void SetPosition()
     {
         objectToMove.localPosition = pressedPosition;
     }
 
-    void returnToNormal()
+    protected void returnToNormal()
     {
         if (objectToMove.localPosition == normalPosition) return;
         objectToMove.localPosition = Vector3.Lerp(objectToMove.localPosition, normalPosition, returnSpeed);
@@ -27,13 +27,13 @@ public class PhysicalButton : MonoBehaviour, IClickable
         if (animate) returnToNormal();
     }
 
-    public void LeftClick()
+    public virtual void LeftClick()
     {
         ClickableEventHandler.Invoke(leftClickMethod);
         if (animate) SetPosition();
     }
 
-    public void RightClick()
+    public virtual void RightClick()
     {
         if (rightClickMethod != "")
         ClickableEventHandler.Invoke(rightClickMethod);

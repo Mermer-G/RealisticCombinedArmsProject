@@ -27,6 +27,18 @@
       },
       {
         "$type": "InputAction, Assembly-CSharp",
+        "name": "HoldDMS",
+        "essential": false,
+        "trigger": {
+          "$type": "HoldToActivateMapTrigger, Assembly-CSharp",
+          "keyCode": "Mouse4",
+          "targetMapName": "DMS",
+          "mapName": "Global",
+          "requiresUpdate": true
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
         "name": "HoldRDRMAN",
         "essential": false,
         "trigger": {

@@ -1,0 +1,62 @@
+{
+  "$type": "InputMap, Assembly-CSharp",
+  "mapName": "DMS",
+  "isActive": false,
+  "RequiredMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": []
+  },
+  "BlacklistedMaps": {
+    "$type": "System.String[], mscorlib",
+    "$values": ["TMS"]
+  },
+  "inputActions": {
+    "$type": "InputAction[], Assembly-CSharp",
+    "$values": [
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DMSUp",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "W",
+          "mapName": "DMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DMSDown",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "S",
+          "mapName": "DMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DMSLeft",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "A",
+          "mapName": "DMS",
+          "requiresUpdate": false
+        }
+      },
+      {
+        "$type": "InputAction, Assembly-CSharp",
+        "name": "DMSRight",
+        "essential": false,
+        "trigger": {
+          "$type": "KeyDownTrigger, Assembly-CSharp",
+          "keyCode": "D",
+          "mapName": "DMS",
+          "requiresUpdate": false
+        }
+      }
+    ]
+  }
+}
