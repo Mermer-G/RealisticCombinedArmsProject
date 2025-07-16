@@ -274,10 +274,10 @@ MonoBehaviour:
     m_Value: 0
   maximumHeight:
     m_OverrideState: 1
-    m_Value: 50
+    m_Value: 121.3
   meanFreePath:
     m_OverrideState: 1
-    m_Value: 400
+    m_Value: 1
   enableVolumetricFog:
     m_OverrideState: 1
     m_Value: 0
@@ -550,7 +550,7 @@ MonoBehaviour:
     m_Value: 0
   m_CloudPreset:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 4
   cumulusMap:
     m_OverrideState: 1
     m_Value: {fileID: 0}
@@ -695,19 +695,19 @@ MonoBehaviour:
     m_Value: 0.5
   densityMultiplier:
     m_OverrideState: 1
-    m_Value: 0.4
+    m_Value: 0.627
   shapeFactor:
     m_OverrideState: 1
     m_Value: 0.9
   shapeScale:
     m_OverrideState: 1
-    m_Value: 5
+    m_Value: 0.1
   shapeOffset:
     m_OverrideState: 1
     m_Value: {x: 0, y: 0, z: 0}
   erosionFactor:
     m_OverrideState: 1
-    m_Value: 0.8
+    m_Value: 0.546
   erosionScale:
     m_OverrideState: 1
     m_Value: 107
@@ -1592,10 +1592,10 @@ MonoBehaviour:
     m_Value: 1
   upperHemisphereLuxValue:
     m_OverrideState: 1
-    m_Value: 0.4660715
+    m_Value: 0.015657494
   upperHemisphereLuxColor:
     m_OverrideState: 1
-    m_Value: {x: 0.18750614, y: 0.29181972, z: 0.5}
+    m_Value: {x: 0.02088732, y: 0.1197309, z: 0.5}
   desiredLuxValue:
     m_OverrideState: 1
     m_Value: 20000
@@ -1610,7 +1610,7 @@ MonoBehaviour:
     m_Value: 0
   hdriSky:
     m_OverrideState: 1
-    m_Value: {fileID: 8900000, guid: 8253d41e6e8b11a4cbe77a4f8f82934d, type: 3}
+    m_Value: {fileID: 0}
   distortionMode:
     m_OverrideState: 1
     m_Value: 0
@@ -1796,7 +1796,7 @@ MonoBehaviour:
   active: 1
   skyType:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 4
   cloudType:
     m_OverrideState: 1
     m_Value: 0
@@ -1913,7 +1913,7 @@ MonoBehaviour:
     m_Value: 1
   layers:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
   resolution:
     m_OverrideState: 1
     m_Value: 1024
@@ -2134,7 +2134,7 @@ MonoBehaviour:
     m_Value: 0
   type:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
   atmosphericScattering:
     m_OverrideState: 1
     m_Value: 1
@@ -2161,16 +2161,16 @@ MonoBehaviour:
     m_Value: 55261.973
   aerosolDensity:
     m_OverrideState: 1
-    m_Value: 0.01192826
+    m_Value: 0
   aerosolTint:
     m_OverrideState: 1
-    m_Value: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
   aerosolMaximumAltitude:
     m_OverrideState: 1
     m_Value: 8289.296
   aerosolAnisotropy:
     m_OverrideState: 1
-    m_Value: 0.8
+    m_Value: 0.382
   ozoneDensityDimmer:
     m_OverrideState: 1
     m_Value: 1

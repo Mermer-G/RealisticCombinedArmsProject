@@ -6,7 +6,7 @@ using UnityEngine;
 public class Rotor : MonoBehaviour
 {
     [SerializeField] GameObject rotorHead;
-    [Range(-360, 360)][SerializeField] float rotation;
+    [Range(-360, 360)] public float rotation;
     [Range(-30, 30)] public float speed;
 
     public bool enableLimits;

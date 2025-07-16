@@ -9,7 +9,7 @@ public class Hinge : MonoBehaviour
     [Range(-150, 180)] public int maxLimit;
     [Range(-180, 150)] public int minLimit;
     [Range(-30, 30)] public float speed;
-    [Range(-90, 90)] [SerializeField] float rotation;
+    [Range(-90, 90)] public float rotation;
     [SerializeField] float offsetValue = 90;
 
     [SerializeField] bool drawArc;

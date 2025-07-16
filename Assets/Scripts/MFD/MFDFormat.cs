@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 public interface IMFDFormat 
 {
+    string Context { get; set; }
     Stack<(int index, string label)> OSBUpdates { get; }
     public void OnFormatEnter();
     public void OnFormatStay();

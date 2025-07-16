@@ -18,4 +18,9 @@ public class MFDOSB : PhysicalButton
         if (rightClickMethod != "")
             ClickableEventHandler.Invoke(rightClickMethod, this);
     }
+
+    private void Update()
+    {
+        if (animate) returnToNormal();
+    }
 }

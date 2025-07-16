@@ -1,44 +1,93 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using static Unity.Burst.Intrinsics.X86.Avx;
-using static UnityEngine.UI.Image;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.Rendering.Universal;
+using ColorAdjustments = UnityEngine.Rendering.HighDefinition.ColorAdjustments;
+using ColorCurves = UnityEngine.Rendering.HighDefinition.ColorCurves;
+using Random = UnityEngine.Random;
 
 public class TargettingPod : MonoBehaviour, ISensorOfInterest
 {
-    EnergyConsumerComponent consumer;
-    [SerializeField] Camera podCamera;
+    public Camera podCamera;
     [SerializeField] Rotor azimuth;
     [SerializeField] Hinge elevation;
     [SerializeField] RenderTexture RT;
+    [SerializeField] LayerMask mask;
+    [SerializeField] int renderingFPS;
+    [SerializeField] float timeToBoot;
+    [SerializeField] VolumeProfile volumeProfile;
+    [SerializeField] ColorAdjustments colorAdjustments;
+    [SerializeField] ColorCurves colorCurves;
 
+    EnergyConsumerComponent consumer;
     Transform azimuthHead;
     Transform elevationHead;
 
-    [SerializeField] LayerMask mask;
     public float azimuthSpeed; // Yatay eksen dönüþ hýzý
     public float elevationSpeed; // Dikey eksen dönüþ hýzý
-    public float stabilizerSpeed;
-
-    [SerializeField] GameObject cube;
-
-    Vector3 target;
-
-    [SerializeField] int renderingFPS;
-
-    [SerializeField] bool gravityAlign;
-    Vector3 manualControlVector = Vector3.zero;
-
-    Vector3 tempSearchPoint = Vector3.zero;
-
+    
     [Header("Format values")]
     public bool enableRendering;
     public bool narrowZoom;
+
+    //System values
+    bool active;
+    float bootStartedAt;
+    bool SOI;
+
+    public float exposure;
+    public float contrast;
+
+    //Dynamic vectors
+    Vector3 manualControlVector = Vector3.zero;
+    Vector3 trackingPoint = Vector3.zero;
+    public Vector3 target;
+    public Vector2 targetAngles;
+
+    //Still vectors
+    Vector2 CursorZero = new Vector2(0, -90);
+    Vector2 STBY = new Vector2(0, 90);
+
+    //Enums
+    public TrackType trackingType = TrackType.Locked;
+    public MasterMode masterMode = MasterMode.STBY;
+    public CameraMode cameraMode = CameraMode.TV;
+    public enum TrackType
+    {
+        Locked, // Locked gimbals and not moving.
+        FreeLook, //Not traking just keeping the same direction.
+        SlaveOnly, // SPI
+        INR, // INR POINT track
+        Area, // AREA track
+        Point // POINT track
+    }
     
-    bool SOI = true;
+    public enum MasterMode
+    {
+        STBY,
+        AG,
+        AA
+    }
 
+    public enum CameraMode
+    {
+        TV,
+        WHOT,
+        BHOT
+    }
 
+    [System.Serializable]
+    public class CameraModeValues
+    {
+        public float contrast;
+        public float exposure;
+    }
+
+    [SerializeField] CameraModeValues TV = new() { contrast = 100 , exposure = 10};
+    [SerializeField] CameraModeValues WHOT = new() { contrast = 100, exposure = 10 };
+    [SerializeField] CameraModeValues BHOT = new() { contrast = 100, exposure = 10 };
 
     // Start is called before the first frame update
     void Start()
@@ -46,16 +95,15 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
         consumer = GetComponent<EnergyConsumerComponent>();
         azimuthHead = azimuth.transform.GetChild(0);
         elevationHead = elevation.transform.GetChild(0);
+
+        volumeProfile.TryGet(out colorAdjustments);
+        volumeProfile.TryGet(out colorCurves);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Keypad1)) podCamera.enabled = !podCamera.enabled;
-
-        if (Input.GetKeyDown(KeyCode.Keypad2)) ControlByState("Control");
-
-        if (InputManager.instance.GetInput("TMSDown").ToBool()) ControlByState("SearchMode");
+        //if (InputManager.instance.GetInput("TMSDown").ToBool() && SOI) ControlByState("SearchMode");
 
         if (enableRendering && !consumer.IsPoweredE)
         {
@@ -66,26 +114,103 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
             consumer.ChangePowerStatusE(false);
         }
 
-
-        Zoom();
-
-        if (state == TGPState.Manual)
+        if (InputManager.instance.GetInput("TMSLeft").ToBool())
         {
-            target = tempSearchPoint;
+            CycleCameraMode();
         }
         
-        if (gravityAlign)
-        {
-            if (state == TGPState.Manual)
-            {
-                DoAbsoluteGravityAlign(Vector3.zero);
-            }
-            if (state == TGPState.AreaTrack)
-            {
-                DoAbsoluteGravityAlign(tempSearchPoint);
-            }
-        }
+        
+        
+        Zoom();
         Render();
+        Boot();
+        input = GetInput();
+    }
+
+    void SaveVisionModeValues()
+    {
+        switch (cameraMode)
+        {
+            case CameraMode.TV:
+                TV.contrast = contrast;
+                TV.exposure = exposure;
+                break;
+
+            case CameraMode.WHOT:
+                WHOT.contrast = contrast;
+                WHOT.exposure = exposure;
+                break;
+
+            case CameraMode.BHOT:
+                BHOT.contrast = contrast;
+                BHOT.exposure = exposure;
+                break;
+        }
+    }
+
+    void LoadVisionModeValues()
+    {
+        switch (cameraMode)
+        {
+            case CameraMode.TV:
+                contrast = TV.contrast;
+                exposure = TV.exposure;
+                break;
+
+            case CameraMode.WHOT:
+                contrast = WHOT.contrast;
+                exposure = WHOT.exposure;
+                break;
+
+            case CameraMode.BHOT:
+                contrast = BHOT.contrast;
+                exposure = BHOT.exposure;
+                break;
+        }
+    }
+
+    void SetValuesToVolume()
+    {
+        colorAdjustments.postExposure.value = exposure;
+        colorAdjustments.contrast.value = contrast;
+    }
+
+    public void CycleCameraMode()
+    {
+        switch (cameraMode)
+        {
+            case CameraMode.TV:
+                cameraMode = CameraMode.WHOT;
+                colorAdjustments.postExposure.overrideState = true;
+                colorCurves.active = false;
+                LoadVisionModeValues();
+                SetValuesToVolume();
+                break;
+
+            case CameraMode.WHOT:
+                cameraMode = CameraMode.BHOT;
+                colorAdjustments.postExposure.overrideState = true;
+                colorCurves.active = true;
+                LoadVisionModeValues();
+                SetValuesToVolume();
+                break;
+
+            case CameraMode.BHOT:
+                cameraMode = CameraMode.TV;
+                colorAdjustments.postExposure.overrideState = false;
+                colorCurves.active = false;
+                LoadVisionModeValues();
+                SetValuesToVolume();
+                break;
+        }
+    }
+
+    public void AdjustColorAdjustmentValue(float ct = 0, float exp = 0)
+    {
+        contrast += ct;
+        exposure += exp;
+        SaveVisionModeValues();
+        SetValuesToVolume();
     }
 
     public void ClearOutRenderTexture(RenderTexture renderTexture)
@@ -120,31 +245,16 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
     private void FixedUpdate()
     {
         ControlByState();
-        
-        switch (state)
-        {
-            case TGPState.Test:
-                break;
-            case TGPState.Manual:
-                break;
-            case TGPState.AreaTrack:
-                cube.transform.position = tempSearchPoint;
-                break;
-            default:
-                break;
-        }
     }
     
-    void DoAbsoluteGravityAlign(Vector3 pos)
+    /// <summary>
+    /// Stabilizes the target to the given point prevents jittering.
+    /// </summary>
+    /// <param name="pos"></param>
+    void Stabilize(Vector3 tgt)
     {
-        if (pos == Vector3.zero)
-            podCamera.transform.rotation = Quaternion.LookRotation(elevationHead.forward, elevationHead.up);
-        
-        else
-        {
-            var dir = pos - elevationHead.position;
-            podCamera.transform.rotation = Quaternion.LookRotation(dir, elevationHead.up);
-        }
+        var dir = tgt - elevationHead.position;
+        podCamera.transform.rotation = Quaternion.LookRotation(dir, elevationHead.up);   
     }
 
     private void OnEnable()
@@ -161,7 +271,9 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
     void OriginShifted(Vector3 shiftingAmount)
     {
         shifted = true;
-        tempSearchPoint -= shiftingAmount;
+        trackingPoint -= shiftingAmount;
+        target -= shiftingAmount;
+        INRPoint -= shiftingAmount;
     }
 
 
@@ -212,7 +324,7 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
 
 
     float[] wideZooms = new float[9]
-{
+    {
     1.000f,
     1.222f,
     1.494f,
@@ -222,7 +334,7 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
     3.333f,
     4.073f,
     5.000f
-};
+    };
 
     float[] narrowZooms = new float[9]
     {
@@ -237,12 +349,13 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
     25.000f
     };
     
-    int currentZoom = 0;
+    public int currentZoom = 0;
+    bool previousZoomMode;
     void Zoom()
     {
         if (!SOI) return;
 
-        if (InputManager.instance.GetInput("TMSRight").ToBool())
+        if (InputManager.instance.GetInput("FOV").ToBool())
             narrowZoom = !narrowZoom;
 
         float zoomInput = InputManager.instance.GetInput("MANRNG");
@@ -253,21 +366,34 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
             currentZoom -= 1;
         currentZoom = Math.Clamp(currentZoom, 0, 8);
 
-        if (narrowZoom)
-            podCamera.focalLength = 60 * narrowZooms[currentZoom];
+        float targetFocalLength = 60f * (narrowZoom ? narrowZooms[currentZoom] : wideZooms[currentZoom]);
+
+        if (narrowZoom != previousZoomMode)
+        {
+            // Zoom modu deðiþtiyse direkt atla
+            podCamera.focalLength = targetFocalLength;
+        }
         else
-            podCamera.focalLength = 60 * wideZooms[currentZoom];
+        {
+            // Ayný modda kalýndýysa yavaþça git
+            float speed = 3f * podCamera.focalLength;
+            podCamera.focalLength = Mathf.MoveTowards(podCamera.focalLength, targetFocalLength, speed * Time.deltaTime);
+        }
+
+        previousZoomMode = narrowZoom;
     }
+
     Vector3 horizontalAxis;
     Vector3 verticalAxis;
-    Vector3 AdvencedControl()
+    //This method slaves pod to a DIRECTION so it is not a targeting method. Might be unneccesary.
+    Vector3 AdvencedControl(Vector2 input)
     {
-        
+        if (!SOI) return manualControlVector + elevationHead.position;
 
-        float horizontal = InputManager.instance.GetInput("RDRHorizontal");
+        float horizontal = input.x;
         horizontal *= 20 / podCamera.focalLength;
 
-        float vertical = InputManager.instance.GetInput("RDRVertical");
+        float vertical = input.y;
         vertical *= 20 / podCamera.focalLength;
 
         if (manualControlVector == Vector3.zero)
@@ -290,22 +416,29 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
         //Debug.DrawLine(elevationHead.position, elevationHead.position + horizontalAxis * 10, Color.blue, 0.2f);
         //Debug.DrawLine(elevationHead.position, elevationHead.position + verticalAxis * 10, Color.red, 0.2f);
         //Debug.DrawLine(elevationHead.position, elevationHead.position + manualControlVector * 10, Color.magenta, 0.2f);
-
         return manualControlVector + elevationHead.position;
     }
 
-    Vector3 SearchModeControl()
+    Vector2 GetInput() 
     {
+        Vector2 input = new Vector2(InputManager.instance.GetInput("RDRHorizontal"), InputManager.instance.GetInput("RDRVertical"));
+        return input;
+    }
+
+    //Will be used with INR and Area track
+    Vector3 SearchModeControl(Vector2 input)
+    {
+        if (!SOI) return trackingPoint;
+
         if (shifted)
         {
             shifted = false;
-            return tempSearchPoint; // Bu frame'de sadece shifting uygulanýr
+            return trackingPoint; // Bu frame'de sadece shifting uygulanýr
         }
-        print("A");
         // Input handling
-        float distance = Vector3.Distance(tempSearchPoint, podCamera.transform.position);
-        float horizontal = InputManager.instance.GetInput("RDRHorizontal") * distance / podCamera.focalLength;
-        float vertical = InputManager.instance.GetInput("RDRVertical") * distance / podCamera.focalLength;
+        float distance = Vector3.Distance(trackingPoint, podCamera.transform.position);
+        float horizontal = input.x * distance / podCamera.focalLength;
+        float vertical = input.y * distance / podCamera.focalLength;
 
         Vector3 forward = podCamera.transform.forward;
 
@@ -316,23 +449,79 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
         // Hareket vektörünü oluþtur
         Vector3 movement = up * vertical + right * horizontal;
 
-        tempSearchPoint += movement;
-        return tempSearchPoint;
+        trackingPoint += movement;
+        return trackingPoint;
+    }
+    Vector3 INRPoint;
+    [SerializeField] float INRErrorMultiplier;
+    Vector3 INRTrack(Vector3 tgt)
+    {
+        if (INRPoint == Vector3.zero) INRPoint = tgt;
+
+        Vector3 noise = new Vector3(
+            Random.Range(-INRErrorMultiplier, INRErrorMultiplier),
+            Random.Range(-INRErrorMultiplier, INRErrorMultiplier),
+            Random.Range(-INRErrorMultiplier, INRErrorMultiplier)
+        );
+
+        INRPoint += noise;
+
+        print("error: " + Vector3.Distance(INRPoint, tgt));
+        return INRPoint;
     }
 
     float azimuthError;
     float elevationError;
-    void AimWithPID(Vector3 target)
+    /// <summary>
+    /// Main targeting method of pod.
+    /// </summary>
+    /// <param name="target"></param>
+    void AimWithPID(Vector3 tgt)
     {
         // Azimuth'u döndür
         azimuthError = CalculateAzimuthAngle(target);
+
+        var dangerAngle = CalculateDangerAngle(target);
+
         float azimuthTargetSpeed = Math.Clamp(PID(azimuthError, PIDCalculationType.azimuth), -10, 10);
-        azimuth.speed = azimuthTargetSpeed;
+        azimuth.speed = dangerAngle < 0.1f ? dangerAngle : azimuthTargetSpeed;
 
         // Elevation'ý döndür
         elevationError = CalculateElevationAngle(target);
         float elevationTargetSpeed = Math.Clamp(PID(elevationError, PIDCalculationType.elevation), -10, 10);
         elevation.speed = elevationTargetSpeed;
+        target = tgt;
+    }
+    
+    void RotateTo(Vector2 angles)
+    {
+        if(Mathf.Abs(azimuth.rotation - angles.x) < 0.1f)
+            azimuth.speed = 0;
+        else
+        {
+            var azimuthAngleError = angles.x - azimuth.rotation;
+            azimuth.speed = Math.Clamp(azimuthAngleError, -.5f, .5f);
+        }
+
+
+        if (Mathf.Abs(elevation.rotation - angles.y) < 0.1f)
+            elevation.speed = 0;
+        else
+        {
+            var elevationAngleError = angles.y - elevation.rotation;
+            elevation.speed = Math.Clamp(elevationAngleError, -.5f, .5f);
+        }
+    }
+
+    /// <summary>
+    /// Calculates how close the target direction to the azimuth axis.
+    /// </summary>
+    /// <returns></returns>
+    float CalculateDangerAngle(Vector3 target)
+    {
+        var azimuthAxis = azimuthHead.up;
+        var dir = target - azimuthHead.position;
+        return Vector3.Angle(dir, azimuthAxis);
     }
 
     public float SignedAngleBetweenVectors(Vector3 vector1, Vector3 vector2, Vector3 axis)
@@ -425,107 +614,238 @@ public class TargettingPod : MonoBehaviour, ISensorOfInterest
         return -Vector3.SignedAngle(projectedCamUp, projectedWorldUp, axis);
     }
 
-    enum TGPState
+    public Vector2 CalculateSAC()
     {
-        Test,
-        Manual,
-        CursorZero,
-        SteerPointTrack,
-        SnowPlow,
-        INRTrack,
-        AreaTrack,
-        PointTrack
+        Vector2 position;
+        var front = podCamera.transform.forward;
+
+        var projectedFront = Vector3.ProjectOnPlane(front, transform.right);
+
+        var angle = -Vector3.SignedAngle(projectedFront, transform.up, transform.right);
+        angle = ProjectUtilities.Map(angle, 0, 135, -1, 1);
+        position.y = -Mathf.Clamp(angle, -1, 1);
+
+        
+
+        angle = Vector3.Dot(front, transform.right);
+        position.x = Mathf.Clamp(angle, -1, 1);
+
+        Debug.DrawLine(transform.position, transform.position + -transform.forward, Color.green, 0.001f);
+        Debug.DrawLine(transform.position, transform.position + transform.up, Color.blue, 0.001f);
+        Debug.DrawLine(transform.position, transform.position + projectedFront, Color.red, 0.001f);
+
+        return position;
     }
 
-    bool SearchModeInputFlag;
-    TGPState state = TGPState.Manual;
-    void ControlByState(string argument = "")
+    public float ExportFocalLentgh()
     {
-        if (argument != "")
-        {
-            if (argument == "SearchMode")
-            {
-                if (state != TGPState.AreaTrack)
-                {
-                    state = TGPState.AreaTrack;
-                    manualControlVector = Vector3.zero;
-                    Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 15000, mask);
-                    tempSearchPoint = hitPoint.point;
-                    print("State has been set to Search Mode");
-                }
-                else
-                {
-                    state = TGPState.Manual;
-                    print("State has been set to Manual");
-                }
-            }
+        return podCamera.focalLength;
+    }
 
-            return;
+    public void AirToGroundMode()
+    {
+        trackingType = TrackType.Locked;
+        targetAngles = CursorZero;
+        enableRendering = true;
+        masterMode = MasterMode.AG;
+    }
+
+    public void AirToAirMode()
+    {
+
+    }
+
+    public void StandByMode()
+    {
+        trackingType = TrackType.Locked;
+        targetAngles = STBY;
+        enableRendering = false;
+        masterMode = MasterMode.STBY;
+        cameraMode = CameraMode.TV;
+        colorAdjustments.postExposure.overrideState = false;
+        colorCurves.active = false;
+        LoadVisionModeValues();
+        SetValuesToVolume();
+    }
+
+    void Boot()
+    {
+        if (active) return;
+        if (!consumer.IsPoweredE) return;
+
+
+        if (bootStartedAt == 0)
+            bootStartedAt = Time.time;
+        if (bootStartedAt + timeToBoot <= Time.time) 
+        {
+            active = true;
+            //Get to STBY mode
+            //Mode is not something it knows. Just give the according values.
+            
+            StandByMode();
         }
+    }
 
-
-        switch (state)
+    Vector2 input;
+    bool inputReleasedFlag;
+    void ControlByState()
+    {
+        switch (trackingType)
         {
-            case TGPState.Test:
-
-                break;
-            case TGPState.Manual:
-                if (manualControlVector == Vector3.zero) manualControlVector = podCamera.transform.forward;
-                if (tempSearchPoint != Vector3.zero) tempSearchPoint = Vector3.zero;
-
-                if (SOI)
+            case TrackType.Locked:
+                //Will rotate to given rotation
+                //Just set a fixed rotation vector. The method will always try to get to that value. When it gets it will just stop.
+                RotateTo(targetAngles);
+                if(manualControlVector != Vector3.zero) manualControlVector = Vector3.zero;
+                //Tracking Type Changes
+                if (input != Vector2.zero)
                 {
-                    AimWithPID(AdvencedControl());
+                    //Change to free look.
+                    trackingType = TrackType.FreeLook;
+                }
+
+                //Will be used for CZ and SnowPlow for now.
+                break;
+
+            case TrackType.FreeLook:
+                if (manualControlVector == Vector3.zero) manualControlVector = podCamera.transform.forward;
+                if (trackingPoint != Vector3.zero) trackingPoint = Vector3.zero;
+
+                AimWithPID(AdvencedControl(input));
+
+                //Tracking Type Changes
+                if (InputManager.instance.GetInput("TMSRight").ToBool())
+                {
+                    trackingType = TrackType.INR;
+                    inputReleasedFlag = true;
+                    INRPoint = Vector3.zero;
+                    SetTrackingPoint();
                 }
 
                 break;
-            case TGPState.AreaTrack:
 
-                SetTempSearchPoint();
+            case TrackType.SlaveOnly:
+                //This is basicaly manual control with no stabilization we will get the SPI from MMC and rotate to its direction with no stab.
+
+                //Requires atleast the use of HMCS SPI setting. In order to work. We need another SOI to use this.
+                break;
+
+            case TrackType.INR:
+                //Target point track with no stab. Drifts over time but never loses approximate position. (called approximate because it drifts)
+                
+
 
                 //There's input.
-                if (InputManager.instance.GetInput("RDRVertical") != 0 || InputManager.instance.GetInput("RDRHorizontal") != 0 && SOI)
+                if (input != Vector2.zero && SOI)
                 {
-                    AimWithPID(SearchModeControl());
+                    AimWithPID(SearchModeControl(input));
+                    inputReleasedFlag = true;
+                    INRPoint = Vector3.zero;
+                }
+                //There's no input.
+                else
+                {
+                    AimWithPID(INRTrack(trackingPoint));
+                    SetTrackingPoint();
+                    //If ^this raycast fails:
+                    if (trackingPoint == Vector3.zero)
+                    {
+                        trackingType = TrackType.FreeLook;
+                        return;
+                    }
+                }
+
+                //Stabilize(INRPoint);
+                //Tracking Type Changes
+                if (InputManager.instance.GetInput("TMSRight").ToBool())
+                    trackingType = TrackType.Area;
+
+                if (InputManager.instance.GetInput("TMSDown").ToBool())
+                    trackingType = TrackType.FreeLook;
+
+                //Works with target
+                break;
+
+            case TrackType.Area:
+                //constantly following with LOS check. 
+                if (manualControlVector != Vector3.zero) manualControlVector = Vector3.zero;
+                
+
+                //There's input.
+                if (input != Vector2.zero && SOI)
+                {
+                    AimWithPID(SearchModeControl(input));
                     LOSLastChecked = Time.time;
                 }
                 //There's no input.
                 else
                 {
                     LineOfSightControl();
-                    AimWithPID(tempSearchPoint);
+                    AimWithPID(trackingPoint);
                 }
+
+                //Tracking Type Changes
+                if (InputManager.instance.GetInput("TMSRight").ToBool())
+                {
+                    trackingType = TrackType.INR;
+                    inputReleasedFlag = true;
+                    INRPoint = Vector3.zero;
+                    SetTrackingPoint();
+                }
+
+                if (InputManager.instance.GetInput("TMSDown").ToBool())
+                    trackingType = TrackType.FreeLook;
+
+                if (InputManager.instance.GetInput("TMSUp").ToBool())
+                    trackingType = TrackType.Point;
+
+                Stabilize(trackingPoint);
+
+                //Works with target
+                break;
+
+            case TrackType.Point:
+                //Constantly following a target with pointTargetable taging script.
+                
+
+
+                //Tracking Type Changes
+                if (InputManager.instance.GetInput("TMSRight").ToBool())
+                    trackingType = TrackType.INR;
+
+                if (InputManager.instance.GetInput("TMSDown").ToBool())
+                    trackingType = TrackType.FreeLook;
+
+                //Works with target
                 break;
         }
-
-
     }
 
-    private void SetTempSearchPoint()
+    private void SetTrackingPoint()
     {
-        if (tempSearchPoint == Vector3.zero || SearchModeInputFlag)
+        if (inputReleasedFlag)
         {
             if (!Physics.Raycast(podCamera.transform.position, podCamera.transform.forward, out RaycastHit hitPoint, 60000, mask))
             {
-                state = TGPState.Manual;
-                print("NO TEMPORARY SEARCH POUNT HAS BEEN FOUND! State has been set to Manual");
+                trackingType = TrackType.FreeLook;
                 return;
             }
-            tempSearchPoint = hitPoint.point;
-            manualControlVector = Vector3.zero;
+            trackingPoint = hitPoint.point;
+            inputReleasedFlag = false;
         }
     }
+
     float LOSLastChecked = 0;
     [SerializeField] float LOSCheckInterval;
     void LineOfSightControl()
     {
         if (Time.time - LOSLastChecked > LOSCheckInterval)
         {
-            Vector3 direction = (tempSearchPoint - podCamera.transform.position).normalized;
+            Vector3 direction = (trackingPoint - podCamera.transform.position).normalized;
             //There's an obstacle
             if (Physics.Raycast(podCamera.transform.position, direction, out RaycastHit hitPoint, 60000, mask))
             {
-                tempSearchPoint = hitPoint.point;
+                trackingPoint = hitPoint.point;
                 LOSLastChecked = Time.time;
                 return;
             }

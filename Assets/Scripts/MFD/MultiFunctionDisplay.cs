@@ -1,4 +1,5 @@
 using System.Linq;
+using TMPro;
 using Unity.VectorGraphics;
 using UnityEngine;
 
@@ -7,9 +8,13 @@ public class MultiFunctionDisplay : MonoBehaviour, ISensorOfInterest
     [SerializeField] int activeFormatIndex;
     [SerializeField] string MFDID;
     [SerializeField] SVGImage SOIRect;
+    [SerializeField] TextMeshProUGUI notSOIText;
+    [SerializeField] GameObject mainMask;
     [SerializeField] float timeToBoot;
     float bootStartedAt;
-    //Powered up and booted
+    /// <summary>
+    /// Powered up and booted
+    /// </summary>
     bool active;
 
     MFDOSB[] OSBArray;
@@ -74,15 +79,18 @@ public class MultiFunctionDisplay : MonoBehaviour, ISensorOfInterest
             var update = currentFormat.OSBUpdates.Pop();
             if (update.index >= OSBArray.Length) continue;
 
-            OSBArray[update.index].tmp.text = update.label;
+            OSBArray[update.index - 1].tmp.text = update.label;
         }
     }
 
+    //Check if the SOI is not null if so unsetsoý
+    //Check if the new format can be SOI so setsoý
     void SwitchFormat(IMFDFormat newFormat)
     {
         currentFormat?.OnFormatExit();
         currentFormat = newFormat;
-        SOIFormat = (ISensorOfInterest)newFormat;
+        if (CheckSOI(currentFormat))
+            SOIFormat = (ISensorOfInterest)newFormat;
         currentFormat.OnFormatEnter();
     }
 
@@ -93,34 +101,53 @@ public class MultiFunctionDisplay : MonoBehaviour, ISensorOfInterest
 
     void GetOSBs()
     {
-        OSBArray = GetComponentsInChildren<MFDOSB>()
-            .OrderByDescending(osb => osb.id) // index'e göre büyükten küçüðe sýrala
-            .ToArray(); // Sonucu tekrar diziye çevir
+        OSBArray = GetComponentsInChildren<MFDOSB>();
+
+        var temp = new MFDOSB[OSBArray.Length];
+        for (int i = 0; i < temp.Length; i++)
+        {
+            temp[OSBArray[i].id] = OSBArray[i];
+        }
+        OSBArray = temp;
     }
 
     public void SetSOI()
     {
+        if (SOIFormat is null) return;
         SOIFormat.SetSOI();
         SOIRect.enabled = true;
+        notSOIText.enabled = false;
     }
 
     public void UnSetSOI()
     {
+        if (SOIFormat is null) return;
         SOIFormat.UnSetSOI();
         SOIRect.enabled = false;
+        notSOIText.enabled = true;
+    }
+    /// <summary>
+    /// Checks if the given format can be SOI
+    /// </summary>
+    /// <returns></returns>
+    bool CheckSOI(IMFDFormat format)
+    {
+        if (format is ISensorOfInterest) return true;
+        else return false;
     }
 
     void Boot()
     {
-        if (active) return;
-        if (!consumer.IsPoweredE) return;
+        if (active) return; //Is the device powered up and booted
+        if (!consumer.IsPoweredE) return; //Is the device powered up
             
 
-        if (bootStartedAt == 0)
+        if (bootStartedAt == 0) //The value to check the boot time. this has to be ref
             bootStartedAt = Time.time;
-        if (bootStartedAt + timeToBoot <= Time.time)
+        if (bootStartedAt + timeToBoot <= Time.time) //Time to boot is how much it will take to boot.
         {
-            active = true;
+            active = true; //This has to be ref
+            mainMask.SetActive(true); //Next things are going to be passed with an void action.
             currentFormat.OnFormatEnter();
         }
     }
@@ -133,7 +160,8 @@ public class MultiFunctionDisplay : MonoBehaviour, ISensorOfInterest
         if (SOIFormat is null)
         {
             currentFormat = formats[activeFormatIndex];
-            SOIFormat = (ISensorOfInterest)currentFormat;
+            if (CheckSOI(currentFormat))
+                SOIFormat = (ISensorOfInterest)currentFormat;
             foreach (IMFDFormat format in formats)
             {
                 print("Found format: " + ((MonoBehaviour)format).name);
@@ -171,7 +199,13 @@ public class MultiFunctionDisplay : MonoBehaviour, ISensorOfInterest
         if (!consumer.IsPoweredE)
         {
             if (((MonoBehaviour)currentFormat).isActiveAndEnabled)
+            {
                 currentFormat.OnFormatExit();
+                GetOSBUpdates();
+                active = false;
+                bootStartedAt = 0;
+                mainMask.SetActive(false);
+            }
             return;
         }
 

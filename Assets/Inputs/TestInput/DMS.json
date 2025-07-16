@@ -8,7 +8,7 @@
   },
   "BlacklistedMaps": {
     "$type": "System.String[], mscorlib",
-    "$values": ["TMS"]
+    "$values": ["TMS-MSB-FOV"]
   },
   "inputActions": {
     "$type": "InputAction[], Assembly-CSharp",

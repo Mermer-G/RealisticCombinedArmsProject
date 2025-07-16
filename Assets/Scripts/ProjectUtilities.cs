@@ -23,7 +23,7 @@ public static class ProjectUtilities
 
     public static float CalculateAltitude(Vector3 position)
     {
-        float altitude = position.y - SeaLevelIndicator.instance.position.y;
+        float altitude = position.y - StaticOrigin.instance.position.y;
         return altitude;
     }
 
@@ -35,7 +35,7 @@ public static class ProjectUtilities
     /// <returns></returns>
     public static float CalculateTemparatureAtAltitude(float tempAtSeaLevel, Vector3 position)
     {
-        float altitude = position.y - SeaLevelIndicator.instance.position.y;
+        float altitude = position.y - StaticOrigin.instance.position.y;
         return tempAtSeaLevel - (L * altitude);
     }
 
@@ -47,7 +47,7 @@ public static class ProjectUtilities
     /// <returns></returns>
     public static float CalculateTemparatureAtSeaLevel(float tempCelcius, Vector3 position)
     {
-        float altitude = position.y - SeaLevelIndicator.instance.position.y;
+        float altitude = position.y - StaticOrigin.instance.position.y;
         return tempCelcius + (L * altitude);
     }
 
@@ -77,7 +77,7 @@ public static class ProjectUtilities
 
     public static float CalculateAirDensity(Vector3 position, float temperatureCelsius, float rho0 = 1.225f)
     {
-        float altitude = position.y - SeaLevelIndicator.instance.position.y;
+        float altitude = position.y - StaticOrigin.instance.position.y;
         var T0 = temperatureCelsius + 273.15f;
 
         // Troposferde sıcaklık değişimi

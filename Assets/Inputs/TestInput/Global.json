@@ -20,7 +20,7 @@
         "trigger": {
           "$type": "HoldToActivateMapTrigger, Assembly-CSharp",
           "keyCode": "Mouse3",
-          "targetMapName": "TMS",
+          "targetMapName": "TMS-MSB-FOV",
           "mapName": "Global",
           "requiresUpdate": true
         }
