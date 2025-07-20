@@ -1,8 +1,11 @@
 using System;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class F110Engine : MonoBehaviour
 {
+    Rigidbody rb;
+
     public bool quickStart;
     [SerializeField] F110FuelPump f110FuelPump;
     [SerializeField] Transform F16;
@@ -84,8 +87,7 @@ public class F110Engine : MonoBehaviour
     [SerializeField] Transform AfterburnerCone;
     Material burner;
 
-    [SerializeField] Transform distortionObject;
-    Material distortion;
+    [SerializeField] VisualEffect heatDistortion;
     #endregion
 
     float energyCreatedThisFrame = 0;
@@ -308,8 +310,8 @@ public class F110Engine : MonoBehaviour
 
     private void Awake()
     {
+        rb = transform.root.GetComponent<Rigidbody>();
         engineMat = GetComponent<MeshRenderer>().material;
-        distortion = distortionObject.GetComponent<MeshRenderer>().material;
         burner = AfterburnerCone.GetComponent<MeshRenderer>().material;
     }
 
@@ -358,13 +360,6 @@ public class F110Engine : MonoBehaviour
         var dSpeed = DistortionSpeed.Evaluate(RPMPercent);
         var dSize = DistortionSize.Evaluate(RPMPercent); 
         var dLength = DistortionLength.Evaluate(RPMPercent);
-
-        distortionObject.transform.localScale = Vector3.Lerp(distortionObject.transform.localScale, new Vector3(dSize, dLength, dSize), 0.05f);
-
-        if (dLength < 0.1f) distortionObject.gameObject.SetActive(false);
-        else distortionObject.gameObject.SetActive(true);
-
-        distortion.SetVector("_DistortionSpeed", new Vector4(dSpeed, dSpeed, 0, 0));
     }
 
     float burnerAlpha;
@@ -376,12 +371,12 @@ public class F110Engine : MonoBehaviour
     {
         burnerAlpha = Mathf.Lerp(burnerAlpha, AfterburnerAlpha.Evaluate(RPMPercent), 0.05f);
         burnerEmission = Mathf.Lerp(burnerEmission, AfterburnerEmission.Evaluate(RPMPercent), 0.05f);
-        burnerSize = Mathf.Lerp(burnerSize, AfterburnerSize.Evaluate(RPMPercent), 0.05f);
+        burnerSize = 0.4f;
         burnerLength = Mathf.Lerp(burnerLength, AfterburnerLength.Evaluate(RPMPercent), 0.05f);
 
         burner.SetFloat("_Alpha", burnerAlpha);
         burner.SetFloat("_EmissionStrength", burnerEmission);
-        AfterburnerCone.localScale = new Vector3(burnerSize, burnerSize, burnerLength);
+        AfterburnerCone.localScale = new Vector3(burnerSize, burnerLength, burnerSize);
 
     }
     #endregion
