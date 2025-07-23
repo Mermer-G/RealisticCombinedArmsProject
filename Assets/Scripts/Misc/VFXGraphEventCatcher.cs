@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -6,8 +7,10 @@ public class VFXGraphEventCatcher : MonoBehaviour
 {
     bool _unsetAttribute;
     bool _unsetAttributeOnNextUpdate;
+    bool setSpeed;
 
     VisualEffect _vfx;
+    [SerializeField] float multiplier; 
 
     /**
     * This is completely fucking bonkers but it's the ONLY way I've found to set a value in the VFX graph for
@@ -24,25 +27,39 @@ public class VFXGraphEventCatcher : MonoBehaviour
             _vfx.SetVector3("_shiftingVector", Vector3.zero);
             _unsetAttribute = false;
             _unsetAttributeOnNextUpdate = false;
+            
         }
-
-        if (_unsetAttribute) _unsetAttributeOnNextUpdate = true;
+        if (_unsetAttribute)
+        {
+            _unsetAttributeOnNextUpdate = true;
+        }
     }
 
     void OnEnable()
     {
         _vfx = GetComponent<VisualEffect>();
         FloatingOrigin.originShifted += UpdatePosition;
+        if (setSpeed)
+            StringEventManager.Subscribe("1-Speed", GetAirSpeed);
     }
 
     void OnDisable()
     {
         FloatingOrigin.originShifted -= UpdatePosition;
+        if (setSpeed)
+            StringEventManager.Subscribe("1-Speed", GetAirSpeed);
+    }
+
+    void GetAirSpeed(string airSpeedS)
+    {
+        _vfx.SetFloat("Speed",(float)Convert.ToDecimal(airSpeedS));
     }
 
     void UpdatePosition(Vector3 position)
     {
-        _vfx.SetVector3("_shiftingVector", position);
+        _vfx.SetVector3("_shiftingVector", position * multiplier);
+
+        print("Büyüklük: " + position.magnitude * multiplier);
         _unsetAttribute = true;
     }
 }
