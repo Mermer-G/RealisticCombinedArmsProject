@@ -58,6 +58,7 @@ public class AerodynamicModel : MonoBehaviour
 
     [Header("Debugging")]
     public bool drawSurfaces;
+    [SerializeField] bool showLiftValues;
     [SerializeField] bool getAllSurfacesInChildren;
     [SerializeField] bool drawCenterOfMass;
     [SerializeField] bool drawCenterOfLift;
@@ -81,15 +82,15 @@ public class AerodynamicModel : MonoBehaviour
         currentTemperature = ProjectUtilities.CalculateTemparatureAtAltitude(temperatureAtSeaLevel, transform.position);
 
         TextFieldManager.Instance.CreateOrUpdateScreenField("AOA").Value($"AOA: {alpha:F1}");
-        TextFieldManager.Instance.CreateOrUpdateScreenField("Lift").Value($"Total Lift: {lift:F1}");
-        TextFieldManager.Instance.CreateOrUpdateScreenField("BenLift").Value($"Beneficial Lift: {beneficialLift:F1}");
-        TextFieldManager.Instance.CreateOrUpdateScreenField("BenLiftRatio").Value($"BL/L Ratio: {benLiftRatio:P0}"); // % format�nda
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("Lift").Value($"Total Lift: {lift:F1}");
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("BenLift").Value($"Beneficial Lift: {beneficialLift:F1}");
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("BenLiftRatio").Value($"BL/L Ratio: {benLiftRatio:P0}"); 
 
-        TextFieldManager.Instance.CreateOrUpdateScreenField("Drag").Value($"Main Drag: {drag:F1}");
-        TextFieldManager.Instance.CreateOrUpdateScreenField("Induced").Value($"Induced Drag: {inducedDrag:F1}");
-        TextFieldManager.Instance.CreateOrUpdateScreenField("TotalDrag").Value($"Total Drag: {totalDrag:F1}");
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("Drag").Value($"Main Drag: {drag:F1}");
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("Induced").Value($"Induced Drag: {inducedDrag:F1}");
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("TotalDrag").Value($"Total Drag: {totalDrag:F1}");
 
-        TextFieldManager.Instance.CreateOrUpdateScreenField("Thrust").Value($"Thrust: {thrust * thrustMultiplier:F1}");
+        //TextFieldManager.Instance.CreateOrUpdateScreenField("Thrust").Value($"Thrust: {thrust * thrustMultiplier:F1}");
         //Lift
         liftValues.Clear();
         Vector3 totalLiftVector = Vector3.zero;
@@ -104,7 +105,7 @@ public class AerodynamicModel : MonoBehaviour
             UpdateValues(surface, force, VType.lift);
             rb.AddForceAtPosition(force * liftMultiplier * surface.surfaceLiftMultiplier, surface.transform.TransformPoint(surface.aerodynamicSurfaceObject.centerPoint));
             totalLiftVector += force;
-            TextFieldManager.Instance.CreateOrUpdateWorldField(surface.name).Value("Lift: " + (int)force.magnitude).FontSize(0.1f).WorldPosition(surface.transform.position + surface.transform.up);
+            if (showLiftValues) TextFieldManager.Instance.CreateOrUpdateWorldField(surface.name).Value("Lift: " + (int)force.magnitude).FontSize(0.1f).WorldPosition(surface.transform.position + surface.transform.up);
         }
         lift = totalLiftVector.magnitude * liftMultiplier;
         beneficialLift = CalculateBeneficialLift(totalLiftVector * liftMultiplier, velocity);
